@@ -71,7 +71,8 @@ Finalization discovers existing owned objects, validates connections, and
 derives an execution plan; it does not invent a second authoritative model.
 The finalized definition must own stable storage for bound references and be
 non-copyable/non-movable unless relocation is explicitly made safe. Simulations
-retain ownership of that definition. Exact handles are proved in Phase 1.
+retain shared ownership of the const definition so independent simulations
+can safely use the same instance. Exact handles are proved in Phase 1.
 
 ### Propagated facts
 

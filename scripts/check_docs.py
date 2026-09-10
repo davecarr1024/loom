@@ -28,7 +28,9 @@ def main() -> int:
             parsed = urlsplit(target)
             if parsed.scheme or parsed.netloc:
                 continue
-            local = (path.parent / unquote(parsed.path)).resolve()
+            # Fragment-only links refer to this document. This checker verifies
+            # target files, not Markdown heading/anchor resolution.
+            local = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path
             if not local.is_relative_to(root) or not local.is_file():
                 errors.append(f"{path.relative_to(root)}: invalid local link {target}")
     if errors:

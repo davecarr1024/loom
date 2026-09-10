@@ -1,8 +1,9 @@
 # Loom agent guide
 
-Read README.md, docs/design.md, docs/timing.md, docs/roadmap.md, and
-docs/status.md before implementation. Consult docs/decisions.md for settled
-boundaries and docs/baseline.md for inherited lessons.
+Read [README.md](README.md), [design](docs/design.md), [timing](docs/timing.md),
+[roadmap](docs/roadmap.md), and [status](docs/status.md) before implementation.
+Consult [decisions](docs/decisions.md) for settled boundaries and
+[baseline](docs/baseline.md) for inherited lessons.
 
 ## Current gate
 
