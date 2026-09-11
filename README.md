@@ -15,23 +15,25 @@ be independently testable before it becomes part of a processor.
 
 ## Status
 
-This is a **design-only skeleton**. There is no C++ library, simulator, CPU,
-assembler, or claimed hardware proof yet. The first implementation bite is a
-standalone register-transfer circuit. The larger destination is a small
+Phase 1 is underway: a C++ register-transfer circuit now runs independently
+of a CPU, with typed connections and snapshot/commit edges. No CPU or assembler
+exists yet. The larger destination is a small
 register machine with a three-stage pipeline, forwarding, stalls, and branch
 flushes, explained through deterministic textual traces.
 
-## Check the skeleton
+## Build and verify
 
-Requires Python 3.9+ and Make; no third-party packages are needed.
+Requires GCC 12/C++23, CMake, Make, Python 3.9+, lcov, clang-format, and
+clang-tidy. CMake fetches GoogleTest v1.14.0. See [Phase 1](docs/phase-1.md)
+for verified tool versions, the clang-tidy compatibility exception, and offline setup.
 
 ```sh
 make check
+./build/transfer
 ```
 
-This checks documentation structure and local links. It does not test a
-machine. C++ build, behavioral tests, compile-fail tests, formatting, static
-analysis, and coverage gates arrive with the first implementation phase.
+This runs documentation checks, behavioral and compile-fail tests, formatting,
+compatible static analysis, and production line/function coverage enforcement.
 
 ## Design record
 
@@ -43,4 +45,4 @@ analysis, and coverage gates arrive with the first implementation phase.
 - [Status](docs/status.md): current evidence and next work.
 - [Agent guide](AGENTS.md): contribution workflow and verification rules.
 
-The design describes intended behavior, not implemented capabilities.
+Status and Phase 1 notes distinguish implemented behavior from the larger design.

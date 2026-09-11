@@ -1,6 +1,6 @@
 # Learning roadmap
 
-Only the documentation skeleton is currently delivered. Phases below are
+Phase 0 is delivered and Phase 1 is underway. Phases below are
 ordered learning checkpoints, not permission to implement the entire plan
 at once. Each phase closes with tests, inspectable evidence, docs, local gates,
 and the push-boundary review in AGENTS.md.
@@ -13,6 +13,9 @@ internal links and coherence of representation, timing, and scope. Publish a
 new repository. No production-code coverage claim applies.
 
 ## Phase 1: An assembly smaller than a CPU
+
+The first register-only slice is implemented; see [Phase 1](phase-1.md) for
+its evidence and remaining work. Phase 1 is not yet marked complete.
 
 First bite: establish C++23/CMake and a width-checked register transfer over an
 explicit connection. Add the smallest structural adapter, finalized assembly,

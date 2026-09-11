@@ -1,6 +1,8 @@
 # Discrete-time contract
 
-This is the intended execution specification. No simulator exists yet.
+This is the execution specification. The first register-only implementation
+implements snapshot/commit edges; combinational scheduling, memory, streaming,
+and processors remain future phases. See [Phase 1](phase-1.md).
 
 ## One edge, one transition
 

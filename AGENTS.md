@@ -7,13 +7,13 @@ Consult [decisions](docs/decisions.md) for settled boundaries and
 
 ## Current gate
 
-Design-only skeleton. `make check` is the current presubmit command. There
-is no production C++ code to cover. Do not report documentation checks as
-hardware verification or invent passing test/coverage commands.
+Phase 1 is underway. `make check` is the presubmit command: docs, tests,
+negative compilation, formatting, compatible static analysis, and coverage.
+`make test`, `make coverage`, and `make format` are focused commands.
 
-The first code phase must add CMake, C++23, GoogleTest/CTest, compile-fail
-checks, clang-format, compatible clang-tidy, coverage, and CI gates. Document
-exact commands and tool versions then. Follow the roadmap one bite at a time.
+Read [Phase 1](docs/phase-1.md) for the current API and toolchain. Clang-tidy
+below 16 is explicitly skipped for std::expected frontend incompatibility;
+do not describe that as a pass. Follow the roadmap one bite at a time.
 
 ## Invariants
 

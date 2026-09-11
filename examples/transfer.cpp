@@ -1,0 +1,26 @@
+#include "loom/circuit.h"
+#include <array>
+#include <iostream>
+
+struct Transfer {
+  const std::string name = "transfer";
+  loom::Register<8> source{"source", 42}, destination{"destination", 0};
+  auto children() const { return std::tie(source, destination); }
+  auto connections() const {
+    return std::tuple{loom::connect(source, source),
+                      loom::connect(source, destination)};
+  }
+};
+int main() {
+  const auto definition = loom::Definition<Transfer>::create();
+  if (!definition)
+    return 1;
+  auto simulation = loom::Simulation<Transfer>::create(*definition);
+  const std::array enables{std::string("transfer.destination")};
+  const auto edge = simulation->step(enables);
+  if (!edge)
+    return 1;
+  for (const auto &sample : edge->registers)
+    std::cout << "edge " << edge->index << " " << sample.path << ": "
+              << sample.before << " -> " << sample.after << '\n';
+}
