@@ -14,3 +14,4 @@ jobs:
       - run: make check
         env:
           CXX: g++-12
+          GCOV: gcov-12

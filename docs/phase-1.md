@@ -33,8 +33,11 @@ must fail compilation with a conflicting `connect` deduction diagnostic.
 
 Run `make check`, or separately `make test`, `make coverage`, `make format`.
 Then run `./build/transfer`. Local tools are GCC 12.2, CMake, Python 3.11,
-lcov 1.16, and clang-format 14. GoogleTest v1.14.0 is fetched by CMake;
-an offline checkout can be supplied with
+lcov 1.16, and clang-format 14. GoogleTest v1.14.0 is fetched by CMake.
+CI pairs GCC 12 with `GCOV=gcov-12`; `gcov` must match the compiler that
+produced the instrumentation. The first CI run exposed a default-gcov-11
+mismatch after its behavioral tests passed. Coverage accepts a `GCOV` override.
+An offline checkout can be supplied with
 `CMAKE_ARGS=-DFETCHCONTENT_SOURCE_DIR_GOOGLETEST=/absolute/path/to/googletest`.
 Clang-tidy below 16 is explicitly skipped due to std::expected frontend
 incompatibility, following Rule Lab; newer versions must run successfully.

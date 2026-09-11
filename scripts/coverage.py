@@ -1,12 +1,14 @@
 """Enforce measured production line/function coverage without excluding paths."""
 from pathlib import Path
+import os
 import subprocess
 import sys
 
 build = Path("build-coverage")
 subprocess.run(["lcov", "--zerocounters", "--directory", str(build)], check=True)
 subprocess.run(["ctest", "--test-dir", str(build), "--output-on-failure"], check=True)
-subprocess.run(["lcov", "--capture", "--directory", str(build), "--output-file",
+subprocess.run(["lcov", "--capture", "--gcov-tool", os.environ.get("GCOV", "gcov"),
+                "--directory", str(build), "--output-file",
                 str(build / "coverage.info")], check=True)
 subprocess.run(["lcov", "--extract", str(build / "coverage.info"),
                 str(Path("include").resolve()) + "/*", "--output-file",
