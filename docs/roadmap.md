@@ -1,134 +1,189 @@
-# Learning roadmap
+# Component construction roadmap
 
-Phase 0 is delivered and Phase 1 is underway. Phases below are
-ordered learning checkpoints, not permission to implement the entire plan
-at once. Each phase closes with tests, inspectable evidence, docs, local gates,
-and the push-boundary review in AGENTS.md.
+The development framework is upward component building. A verified component
+with a purposeful code interface is the unit of progress. Containing circuits
+prove composition and feed regression cases back down; a machine milestone does
+not replace its components' individual acceptance gates.
 
-## Phase 0: Named and reviewable design
+Every component follows [contracts and hardening](component-contracts.md): define,
+construct, test alone, test in a parent, explain the execution, run `make check`,
+and complete the [push-boundary review](../AGENTS.md). Work through each group's
+components individually. The groups below express dependencies and learning
+questions, not permission to implement a whole library at once.
 
-Deliver README, design, timing contract, baseline research, decisions, this
-roadmap, status, agent guidance, and a documentation check with CI. Verify the
-internal links and coherence of representation, timing, and scope. Publish a
-new repository. No production-code coverage claim applies.
+## Current starting point and next task
 
-## Phase 1: An assembly smaller than a CPU
+The original Phase 1 register-only baseline is retained and tested. Its atomic
+wide registers and path-based enables are temporary mechanisms, not the new
+allowed floor. The uncompleted old Phase 2 arithmetic prototype is shelved; its
+unrestricted primitive interface and primitive full adder are not adopted.
+See [status](status.md) and [decisions](decisions.md).
 
-The first register-only slice is implemented; see [Phase 1](phase-1.md) for
-its evidence and remaining work. Phase 1 is not yet marked complete.
+**Next component: NOT, inside the first typed input/output harness.** Define
+one-bit ports and immutable ownership, implement the allowlisted atom, bind an
+explicit input snapshot, and observe both truth-table rows without advancing
+time. Show two connected NOT instances and their derived inventory. Prove wrong
+roles/widths and foreign endpoints are rejected at the appropriate layer. Add
+only the combinational planning needed for this circuit; reject a connected
+combinational loop and prove enumeration-independent evaluation. Preserve the
+existing register tests while introducing this boundary.
 
-First bite: establish C++23/CMake and a width-checked register transfer over an
-explicit connection. Add the smallest structural adapter, finalized assembly,
-state holder, and edge transition needed to execute it independently.
+After that acceptance gate, add each remaining floor atom below. Do not resume
+the old direct-arithmetic primitive API.
 
-Subsequent bites: two-register swap, two independent same-width buses, and
-nesting the circuit inside another assembly using the same public interface.
-Settle stable instance handles and finalized-definition lifetime with tests.
+## A. The atomic digital floor
 
-Proof: exhaustive tiny-width transfer/hold; compile rejection of incompatible
-port widths; runtime invalid binding diagnostics where values require them;
-multiple simulations with independent state; identical result under different
-child enumeration; atomic failure. Artifact: a textual transfer trace.
+Build NOT, AND, OR, constant bit, then one-bit D flip-flop, each with an explicit
+contract. NOT's harness grows into a CPU-independent runner usable at every
+level. External inputs are supplied by value per observation/edge; all machine
+state is declared storage. Admit only the [design allowlist](design.md).
 
-Tooling gate: normal tests, compile-fail cases that fail for the intended
-reason, clang-format, compatible clang-tidy, 100% production line/function
-coverage, and a single presubmit command shared by CI. Pin a working compiler
-and test dependency version then; do not claim untested compiler support.
+Proof: exhaustive gate truth tables; constants have no evolving state; D/Q
+initialization, sampling, repeated edges, and independent simulations. Derive
+inventory and dependency order from owned objects. Test invalid ports, duplicate
+ownership/paths, missing/multiple drivers, foreign bindings, and combinational
+cycles. A DFF breaks a feedback dependency and all DFFs commit simultaneously.
+An invalid input request leaves every stored bit and the edge index unchanged.
 
-Checkpoint: can a reader understand the fixture without knowing any CPU?
+Artifact: truth-table output and a one-bit edge trace with D, old Q, and new Q.
+Checkpoint: can the whole evaluation algorithm be explained using only this floor?
 
-## Phase 2: Arithmetic assembled from smaller parts
+## B. Selection and bit bundles
 
-Build a Boolean full adder, compose a small ripple adder, and place it between
-explicit registers. Derive combinational dependencies and state/port facts
-through separate structural analyses. Reject combinational cycles.
+Construct XOR, a one-bit mux, fixed-width bundles of wires, then a word mux and
+small decoder. XOR and mux behavior must be gate composition. Bit indexing,
+concatenation, splitting, and fan-out are explicit wiring with documented ordering.
 
-Proof: exhaustive four-bit operands/carry, overflow wrapping, feedback through
-a register, and the different latency of combinational and registered paths.
-Artifact: inspectable component inventory and edge-by-edge arithmetic trace.
+Proof: exhaustive one-bit selection, all decoder addresses, representative bundle
+widths, independent same-width paths, and no behavior introduced by adapters.
+Inventory demonstrates the gates used; a parent trace expands a selected output
+into its input ports. Define all selector patterns or reject reserved encodings.
 
-Checkpoint: are facts derived from the actual objects, and is the primitive
-floor useful without introducing gate-delay simulation?
+Artifact: a selected word traced through the actual bit muxes.
+Introduce a width-parameterized selection contract with shared tests for bit
+and word muxes. Checkpoint: do bundles make interfaces readable without hiding
+computation?
 
-## Phase 3: A controller that teaches microcode
+## C. Registers and movement
 
-Compose an accumulator datapath, explicit shared-bus selection, micro-PC,
-control store, and conditional next-address logic. Typed C++ control words
-precede any text DSL. First program: load operands, add, retain a result, stop.
+Construct a word register from DFFs, an enabled register from register/mux
+composition, then a shift register. Establish typed data/enable interfaces and
+explicit initialization. Migrate the transfer baseline to this implementation:
+its wide atomic storage and enabled-path script adapter must then disappear
+from the supported production model. Preserve the old transfer/hold/swap
+behavior through tests at the replacement interface, not a permanent second engine.
 
-Proof: accepted controls target real resources; conflicting selected bus
-drivers and conflicting state writes are rejected; branches inspect the
-documented state edge; encoded/decoded controls round-trip; a trace explains
-each transfer. A validator runs after any future transformation pass.
+Proof: bit independence, whole-word sampling, enable/hold, simultaneous swap,
+one-register-per-edge chain movement, fan-out, nested repeated instances, and
+owned evidence that later edges cannot overwrite. Verify DFF counts from the
+actual register structure. Demonstrate a boundary-to-bit trace expansion.
 
-Checkpoint: can the controller run against this small datapath without a
-global CPU model? No optimizer or assembler is required yet.
+Define the first register contract families around actual consumer needs:
+readable word, edge-loaded word, enabled word, and shift behavior as needed.
+Test shared guarantees and explicit adaptations (such as enable tied high);
+prove that incompatible timing/control shapes are not accepted accidentally.
 
-## Phase 4: Explicit latency and waiting
+Artifact: transfer, swap, and shift traces with register and DFF views.
+Checkpoint: can register behavior be explained entirely through child circuits?
 
-Build one small multi-cycle arithmetic unit (a shift/add multiplier is the
-default) with latched operands and start/busy/done. Then compose a one-item
-ready/valid buffer with a scripted consumer that stalls.
+## D. Selected buses and bus-connected registers
 
-A separate small bite introduces a one-write-port memory and proves
-current-state reads, same-address read/write behavior, and atomic rejection
-of out-of-range access before that component enters a processor.
+Construct a small explicitly selected bus from word muxes and a register bank
+that can send and receive through it. Use a bounded source-selection interface;
+if idle is useful, represent it explicitly with validity and define invalid
+consumption. Do not model tri-state resolution or retained values on an undriven bus.
 
-Proof: precise completion edge, busy-start rejection, unchanged latched operands,
-stable blocked payload, simultaneous consumption/replacement, no lost or
-duplicated values, deterministic bounded progress. Reject combinational
-ready loops. Artifact: a transaction trace with wait reasons.
+Proof: each source/destination, independent same-width buses, fan-out, transfer
+and hold, and rejected invalid selection/consumption with atomic state behavior.
+An ordinary input still has exactly one driver; selection happens inside the
+bus circuit. Test a parent wiring mistake at its integration boundary.
 
-Checkpoint: does time remain understandable when local progress differs?
+Artifact: a transfer expanded into selection, mux outputs, and destination D/Q.
+Checkpoint: do controls describe meaningful resource choices in code?
 
-## Phase 5: A sequential register machine
+## E. Arithmetic and the ALU
 
-Finalize the tiny ISA and memory layout described in design.md. Add a register
-file, instruction/data memories, decoding, and sequential control. Build a
-small independent instruction interpreter for architectural assertions.
+Construct half adder, full adder, small ripple adder, incrementer, equality
+comparison, and a small ALU using Boolean and selection components. Choose the
+ALU's minimal operation set for the forthcoming accumulator datapath; do not
+add speculative operations. Build a counter from incrementer and register.
 
-Proof: arithmetic, load/store, equal branch, illegal instruction and bounds
-faults, and a short summation loop with asserted memory/register results.
-Read/write collision behavior follows timing.md. Artifact: instruction trace.
+Proof: exhaustive full-adder inputs and four-bit operands/carry, wrapping and
+carry-out, equality boundaries, all defined ALU selections, register feedback,
+and combinational versus registered latency. Each full adder must expand to
+gates. Test formulas are independent oracles, never composite execution shortcuts.
 
-Checkpoint: can the datapath be drawn and explained? Concrete differences from
-the microcoded accumulator must be accommodated without CPU-specific core code.
+Artifact: arithmetic and counter traces at ALU, adder, gate, and storage levels.
+Checkpoint: do meaningful interfaces survive several levels of composition?
 
-## Phase 6: Overlap with conservative stalls
+## F. Small storage assemblies
 
-Design the proposed three-stage pipeline in a short phase document first.
-Specify stage contents, operand-read timing, retirement, instruction ages,
-and priorities among stall, flush, halt, and fault. Implement conservative
-dependency stalls before forwarding. Branches discard younger work.
+Construct a small one-write-port memory and register file from registers,
+write decoding, and read selection. Start with a power-of-two capacity and a
+matching address width; select concrete small sizes before implementation.
+Initial contents initialize child storage, not a parallel hidden memory array.
 
-Proof: retirement state agrees with the interpreter; RAW dependencies stall;
-taken branches squash younger stores; halt prevents younger side effects;
-invalid stage payloads cannot execute. Artifact: cycle table with reasons.
+Proof: every address, write-enable/hold, unaffected locations, initialization,
+old-value read on a same-edge write, and simultaneous operand reads for the
+register file. Define invalid encodings if later capacities introduce them.
+Inventory accounts for stored bits and selection logic. No host-array memory
+atom is allowed merely to make examples larger.
 
-Checkpoint: can every idle stage and discarded instruction be explained?
+Artifact: a read/write expanded into address decode, one selected word, and its
+stored bits. Checkpoint: does scaling expose understandable circuits or motivate
+better views rather than behavioral shortcuts?
 
-## Phase 7: Forwarding and delayed memory
+## G. Controller and accumulator datapath
 
-Add one forwarding path at a time, proving which stall it eliminates. Then
-replace fixed-response data memory with a bounded deterministic response
-schedule and an explicit request/response interface.
+Build a bounded sequencer, control store, and conditional next-address circuit
+from established components. Typed control definitions encode actual resource
+choices; constants/wiring and the composed storage/selection circuits implement
+the control store. Develop control families for resource-bound loads, bus selection, and
+sequencer transitions. Prove shared effect contracts and reject incompatible
+resource bindings; use explicit adaptation for differing timing. A host
+instruction handler must not execute the datapath.
+Compose an accumulator datapath using the bus, registers, and ALU before adding
+instruction decode.
 
-Proof: forwarding priority, load-use stalls, held requests, exactly-once stores,
-no duplicated retirement, branch interactions during a wait, and the same
-architectural result across tested latency schedules. Assert cycle counts for
-named cases, not host performance. Artifact: before/after cycle evidence.
+Proof: load, transfer, add, retain, and stop sequences; old-state conditional
+branching; all control encodings or reserved-pattern rejection; resource conflicts;
+exact edge timing. If encoding tooling is introduced, verify encode/decode and
+validate after every transformation. No optimizer or text microcode DSL is needed.
 
-Checkpoint: can the processor's lost cycles now be explained on a whiteboard?
+Artifact: control-state transitions expanded into bus and register activity.
+Checkpoint: can the controller and datapath each be tested without a CPU?
 
-## Phase 8: Close the learning proof
+## H. An IRATA-style accumulator CPU
 
-Curate a headless capability tour: component transfer, composed arithmetic,
-microcoded sequencing, waiting, pipelined dependencies, and memory stalls.
-Link every claim to tests and derive example traces from executable scenarios.
-Write regrets, remaining limitations, and an assessment of which abstractions
-earned their place. The v1 goal is complete only when the pipeline can be
-explained and its architectural effects verified, not when the library has
-accumulated many components.
+Use the established datapath, controller, memory, and decoding components to
+construct one small accumulator CPU. Before implementation, specify its width,
+minimal ISA, addressing, initialization, halt/fault behavior, and a bounded demo
+program. IRATA-style means visible bus movement and explicit control, not 6502
+compatibility or inherited simulator phases.
 
-Caches, alternate clocks, synthesis, out-of-order execution, text HDL syntax,
-and interactive visualization require a new concrete learning question.
+Proof: instruction semantics against an independent test oracle, arithmetic,
+load/store, branch, halt, illegal encodings, and a short loop with asserted
+architectural state. Reuse component tests and show at least one reduced defect
+or explicitly injected test-only fault whose repair is verified through parents.
+
+Artifact: one execution viewed as instructions, controller steps, transfers,
+and selected child gates/DFFs. Close the initial construction proof with a
+capability tour, interface/bug retrospective, and known limitations.
+Checkpoint: can someone explain a machine failure by descending through its circuits?
+
+## I. Successive machine questions
+
+These are planned extensions after H, each requiring its own component contracts
+and design checkpoint. They do not fix today's ISA or component interfaces.
+
+| Construction | New question | Required evidence before acceptance |
+| --- | --- | --- |
+| Sequential register CPU | How does explicit operand organization change the datapath? | Tested register-file integration and instruction-oracle agreement |
+| Multi-cycle unit and one-item channel | How do composed components retain work and wait? | Latched operands, exact completion edge, stable blocked payload, consume/replace, bounded progress, rejected ready loops |
+| Conservative pipeline | How can overlap remain correct? | Declared stage state and priorities, valid/age handling, retirement-oracle agreement, dependency stalls, branch squash and halt/fault effects |
+| Forwarding and delayed memory | Which waits are necessary? | Each forwarding priority, load-use waits, held requests, exactly-once stores/retirement, deterministic schedules and before/after cycle evidence |
+
+Use the same circuit model and admit new atoms only through the floor-change
+policy. Each CPU must teach a named question; an open-ended CPU tournament,
+performance contest, caches, alternate clocks, synthesis, and out-of-order
+execution are outside this plan.

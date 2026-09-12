@@ -3,20 +3,35 @@
 Read [README.md](README.md), [design](docs/design.md), [timing](docs/timing.md),
 [roadmap](docs/roadmap.md), and [status](docs/status.md) before implementation.
 Consult [decisions](docs/decisions.md) for settled boundaries and
-[baseline](docs/baseline.md) for inherited lessons.
+[baseline](docs/baseline.md) for inherited lessons. Read
+[component contracts](docs/component-contracts.md) before defining a component.
 
 ## Current gate
 
-Phase 1 is underway. `make check` is the presubmit command: docs, tests,
+The register-only Phase 1 baseline is transitional. The revised construction
+plan starts with NOT; do not resume the shelved arithmetic prototype.
+`make check` is the presubmit command: docs, tests,
 negative compilation, formatting, compatible static analysis, and coverage.
 `make test`, `make coverage`, and `make format` are focused commands.
 
 Read [Phase 1](docs/phase-1.md) for the current API and toolchain. Clang-tidy
 below 16 is explicitly skipped for std::expected frontend incompatibility;
-do not describe that as a pass. Follow the roadmap one bite at a time.
+do not describe that as a pass. Follow the roadmap one component at a time.
 
 ## Invariants
 
+- Upward component construction is the development framework. Define a useful
+  code contract, prove the component alone and in a parent, then build above it.
+- Restrict behavior atoms to NOT, AND, OR, constant bit, and initialized DFF.
+  Larger components execute children and wires, never composite callbacks.
+  The retained atomic wide register is temporary baseline code only.
+- Separate containment from contract families. Use concepts/traits and explicit
+  adapters; claimed specialization must preserve meaning, timing, and valid-use
+  rules, with shared contract tests. Do not force an inheritance hierarchy.
+- Preserve revealing system regressions and reduce failures to their true leaf
+  or integration boundary. Rerun affected parents after every repair.
+- Derive hierarchical explanations from the actual execution and port paths;
+  do not maintain a separate behavioral story or substitute fast host models.
 - Preserve the hardware-ish boundary: pure combinational functions, explicit
   storage, discrete time, and visible control. No analog or gate-delay model.
 - Components must run inside a small assembly without a CPU root.

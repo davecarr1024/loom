@@ -3,6 +3,7 @@
 // The first circuit vocabulary: explicit registers and typed connections.
 // Inventories are derived from owned objects; there is no CPU or global
 // registry.
+#include "loom/structure.h"
 #include <algorithm>
 #include <cstdint>
 #include <expected>
@@ -14,27 +15,6 @@
 #include <vector>
 
 namespace loom {
-
-template <unsigned Width> struct Register {
-  static_assert(Width > 0 && Width <= 64, "register width must be 1..64");
-  static constexpr unsigned width = Width;
-  static constexpr std::uint64_t mask = UINT64_MAX >> (64 - Width);
-  const std::string name;
-  const std::uint64_t reset;
-  Register(std::string label, std::uint64_t initial)
-      : name(std::move(label)), reset(initial & mask) {}
-};
-
-template <unsigned Width> struct Connection {
-  const Register<Width> *source;
-  const Register<Width> *destination;
-};
-
-template <unsigned Width>
-auto connect(const Register<Width> &source,
-             const Register<Width> &destination) {
-  return Connection<Width>{&source, &destination};
-}
 
 struct Error {
   std::string operation;
@@ -57,14 +37,22 @@ struct Wire {
 // Recurse through ownership only; connections never extend object lifetime.
 template <class Node>
 void discover(const Node &node, const std::string &prefix,
-              std::vector<Storage> &storage, std::vector<Wire> &wires) {
+              std::vector<Storage> &storage, std::vector<Wire> &wires,
+              std::vector<Error> &errors) {
   const auto path = prefix.empty() ? node.name : prefix + "." + node.name;
-  if constexpr (requires { Node::width; }) {
+  if (node.name.empty() ||
+      node.name.find_first_not_of(
+          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-") !=
+          std::string::npos) {
+    errors.push_back({"invalid_name", path});
+    return;
+  }
+  if constexpr (RegisterComponent<Node>) {
     storage.push_back({&node, path, node.reset});
   } else {
     std::apply(
         [&](const auto &...child) {
-          (discover(child, path, storage, wires), ...);
+          (discover(child, path, storage, wires, errors), ...);
         },
         node.children());
     std::apply(
@@ -78,7 +66,7 @@ void discover(const Node &node, const std::string &prefix,
 
 // A finalized definition retains its root at a stable address. Simulations
 // share the const definition and own only evolving state.
-template <class Root> class Definition {
+template <OwnedRoot Root> class Definition {
 public:
   template <class... Args>
   static std::expected<std::shared_ptr<const Definition>, Error>
@@ -86,7 +74,10 @@ public:
     auto result = std::shared_ptr<Definition>(
         new Definition(std::forward<Args>(args)...));
     std::vector<detail::Wire> wires;
-    detail::discover(result->root_, "", result->storage_, wires);
+    std::vector<Error> errors;
+    detail::discover(result->root_, "", result->storage_, wires, errors);
+    if (!errors.empty())
+      return std::unexpected(errors.front());
     auto &storage = result->storage_;
     std::ranges::sort(storage, {}, &detail::Storage::path);
     for (std::size_t i = 0; i < storage.size(); ++i) {
@@ -140,7 +131,7 @@ struct Edge {
   bool operator==(const Edge &) const = default;
 };
 
-template <class Root> class Simulation {
+template <OwnedRoot Root> class Simulation {
 public:
   static std::expected<Simulation, Error>
   create(std::shared_ptr<const Definition<Root>> definition,

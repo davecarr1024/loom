@@ -1,10 +1,17 @@
-# Phase 1: first register-only circuit
+# Phase 1: independently composed register circuits
+
+This is the retained register-only baseline from the original roadmap. It
+proves ownership and atomic edges but does not implement the restricted atom
+floor in the revised [design](design.md). The construction plan supersedes the
+old phase sequence; [roadmap](roadmap.md) owns the next work.
 
 ## Implemented interface
 
 `Register<W>` declares a named register of width 1..64 with reset bits masked
 to its width. `connect(source, destination)` requires equal register widths at
-compile time. Each register currently has one data connection; self-connection
+compile time. Explicit `output()` and `input()` endpoints additionally reject
+reversed roles. The register-to-register overload remains a compatibility
+adapter through those same endpoints. Each register has one data connection; self-connection
 is an explicit way to retain a source register's value.
 
 A composite owns its objects and exposes tuples of references through
@@ -13,6 +20,15 @@ constructs that root in stable owned storage, derives the register inventory
 and wires, sorts diagnostic paths, and validates driver completeness and
 membership. Connections use object identity, not width or names, to bind.
 The derived inventory is an execution plan, not another authored hierarchy.
+
+`structure.h` owns registers, endpoints, structural concepts, and type-only
+`CircuitFacts<T>`; `circuit.h` owns finalization, simulation, and edge evidence.
+`CircuitFacts` adds register counts through the actual child tuple types and
+derives one data input/output per register. Connections do not duplicate those
+counts. The current facts concern register-only assemblies, not future nodes.
+Root references/pointers and child tuples containing copied values are rejected
+by concepts. Names are nonempty ASCII letters/digits/underscore/hyphen; dots
+are reserved for hierarchy. Bad names at any depth fail finalization.
 
 `Simulation<Root>::create` retains shared const-definition ownership. `step`
 takes a span of enabled register paths; omitted registers hold. Invalid or
@@ -27,7 +43,9 @@ budget exhaustion is an unfinished run, not a hardware deadlock claim.
 
 `tests/circuit_test.cpp` exhaustively tests all 256 four-bit register pairs and
 checks nesting, child-order independence, separate simulations, topology
-diagnostics, retained evidence, and atomic input failure. `wrong_width.cpp`
+diagnostics, retained evidence, atomic input failure, fan-out, and a chain that
+advances only one register per edge. Static assertions prove nested graph facts,
+root/child constraints, and incompatible endpoint roles. `wrong_width.cpp`
 must fail compilation with a conflicting `connect` deduction diagnostic.
 `examples/transfer.cpp` is the first headless artifact, transferring 42.
 
@@ -46,13 +64,18 @@ Coverage measures instantiated production header lines/functions, excluding
 tests, third-party code, and the example CLI adapter. It does not prove every
 possible template instantiation. No production coverage exclusions are used.
 
-## Remaining Phase 1 work
+## Phase checkpoint and limits
 
-The first vocabulary is register-only. Before declaring the phase complete,
-tighten structural concepts and name validation, expose explicit input/output
-endpoint roles, add compile-time propagated register/port facts, and prove a
-register chain and fan-out through the same interface. The initial single
-header should split by domain as those boundaries become concrete.
+Phase 1 now has its register-only execution proof, typed endpoints, structural
+concepts, propagated facts, nested composition, invalid-wiring diagnostics,
+headless artifact, and coverage/toolchain gates. The next component is NOT
+with typed external ports and pure observation. Later, composed DFF registers
+replace atomic wide registers while retaining these behavioral proofs.
+
+What became visible: the same-width registers can swap or form a pipeline
+chain solely by changing connections, while edge semantics remain unchanged.
+What became load-bearing: stable definition ownership and snapshot reads.
+Do not generalize the small register-count trait into a property framework yet.
 
 An assembly must expose actual owned child references and stable endpoint
 references; arbitrary user implementations of the structural protocol are

@@ -1,8 +1,22 @@
 # Discrete-time contract
 
-This is the execution specification. The first register-only implementation
-implements snapshot/commit edges; combinational scheduling, memory, streaming,
-and processors remain future phases. See [Phase 1](phase-1.md).
+This is the target execution specification for the construction plan. The
+transitional implementation proves register-only snapshot/commit edges; it has
+no gates, DFF circuits, combinational scheduler, or external data inputs yet.
+See [status](status.md) and [Phase 1](phase-1.md) for implemented evidence.
+
+## Storage defines the time boundary
+
+The only initial state atom is an initialized one-bit D flip-flop. Q exposes
+committed state throughout evaluation; D determines its next value. Every DFF
+samples and commits on the same simulator-wide edge. Clock is not a routed
+Boolean signal. There are no gate-built latches, derived clocks, asynchronous
+reset events, settling iterations, or independently ticking subassemblies.
+
+Composites acquire timing from their children. A word register is parallel DFFs;
+an enabled register selects old Q or new data onto D. Memory and controller
+storage follow the same rule. Initialization sets each declared stored bit
+before edge 0; a later synchronous reset, if needed, is data-selection circuitry.
 
 ## One edge, one transition
 
@@ -27,11 +41,11 @@ references to buffers that the next step overwrites.
   boundaries are treated as sources/sinks. Feedback through a register is valid.
 - Derive a topological plan during finalization. Reject a combinational cycle
   with an endpoint path; do not iterate toward a guessed fixed point.
-- Each combinational primitive declares its dependency contract. Initially
-  each combinational output may conservatively depend on every combinational
-  input. Stored outputs are current-state sources and do not depend on their
-  next-state inputs. False cycle rejections motivate more precise per-output
-  declarations only when demonstrated.
+- The allowed Boolean atoms declare their input dependencies. Derive a
+  composite's dependencies through its actual child connections, rather than
+  assuming every composite output depends on every input. Stored Q outputs
+  are current-state sources and do not depend on their D inputs at this edge.
+  Wiring aliases preserve the dependencies of the bits they reference.
 - Enumeration order cannot affect values. Stable hierarchical paths provide
   deterministic tie-breaking for independent evaluations and trace ordering.
 - Fan-out is allowed. Multiple ordinary drivers, missing required inputs,
@@ -43,21 +57,24 @@ references to buffers that the next step overwrites.
   truncation, and signed interpretation require explicit documented semantics;
   host-language undefined behavior must never define circuit behavior.
 
-## Registers and memory
+## Composed registers and memory
 
-A register samples its data when enable is true; otherwise it holds. Swapping
+An enabled register samples its data when enable is true; otherwise it holds.
+An always-loading register samples on every edge. Swapping
 two registers on one edge swaps their old values. Register chains advance at
 most one register per edge.
 
-Initial memory/register-file components use combinational reads from current
-storage and writes committed on the edge. A read and write to the same address
-therefore observes the old value for that edge. Bounds and conflicting writes
+Initial memory/register-file circuits use composed registers, decode, and
+selection: combinational reads from current storage and writes committed on
+the edge. A read and write to the same address therefore observes the old
+value for that edge. Bounds and conflicting writes
 are checked before any commit. One write port is the initial memory boundary.
 Later registered or delayed memory uses a separately named component contract.
 
-## Multi-cycle work and streams
+## Later multi-cycle work and streams
 
-The first multi-cycle unit uses start/busy/done with one operation in flight.
+When the roadmap reaches waiting components, the first multi-cycle unit uses
+start/busy/done with one operation in flight.
 Acceptance occurs on an edge when start is asserted and the unit is idle.
 Its operands are latched at acceptance, so later input changes do not affect
 that operation. The proof must define the exact result edge and behavior of a
@@ -103,6 +120,7 @@ Cross-version serialized replay is not promised in v1.
 
 Before the first processor, prove register swap, a two-stage register chain,
 fan-out, two independent same-width buses, order-independent results, rejected
-combinational feedback, read-before-write memory behavior, and held output
-under backpressure. These are separate milestone tests, not claims about the
-current documentation skeleton.
+combinational feedback, and read-before-write memory behavior. Held output under
+backpressure belongs to the later waiting-component gate and must be proved
+before adopting streaming components. These are acceptance requirements, not
+claims about the transitional implementation.

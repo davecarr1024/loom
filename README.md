@@ -1,25 +1,31 @@
 # Loom
 
 A headless C++23 laboratory for building understandable digital machines from
-small, typed components.
+small, typed circuits.
 
-Loom asks: **can I understand an overlapped, pipelined processor as clearly as
-I understand my 6502-style machine?** Its name describes the work: weaving
-components and connections into a machine whose behavior can be followed.
+**Can increasingly complex machines preserve local reasoning, reproducible
+failures, and explanations at every level?** Loom explores that question by
+building upward: gates and flip-flops, registers and buses, arithmetic and
+memory, controllers and successive CPUs.
 
-The project combines IRATA2's **hardware-ish** philosophy with Rule Lab's
-concrete typed composition, propagated traits, and structural inspection.
-Combinational functions compute results; explicit registers retain state;
-discrete clock edges define when state changes. Every larger assembly should
-be independently testable before it becomes part of a processor.
+The abstraction floor keeps evaluation simple: a small Boolean basis and
+explicit one-bit storage, with acyclic combinational propagation between shared
+clock edges. Larger components must execute as circuits of smaller components.
+Hardware-ish modeling and constrained interfaces make state, timing, and valid
+choices visible. Tests harden each component and its containing assemblies.
 
 ## Status
 
-Phase 1 is underway: a C++ register-transfer circuit now runs independently
-of a CPU, with typed connections and snapshot/commit edges. No CPU or assembler
-exists yet. The larger destination is a small
-register machine with a three-stage pipeline, forwarding, stalls, and branch
-flushes, explained through deterministic textual traces.
+The construction plan is defined; the new atom floor is not implemented yet.
+The tested register-only Phase 1 baseline remains as transitional code, with
+width-safe role-specific endpoints, nested composition, structural counts, and
+atomic transfer/hold/swap edges. Its atomic wide registers will be replaced by
+composed flip-flops. The unfinished arithmetic prototype has been shelved.
+
+Next: build and independently prove NOT through typed external ports, pure
+observation, and derived circuit inspection. See [roadmap](docs/roadmap.md)
+for the dependency-ordered construction plan and [status](docs/status.md) for
+current evidence and limitations.
 
 ## Build and verify
 
@@ -32,17 +38,16 @@ make check
 ./build/transfer
 ```
 
-This runs documentation checks, behavioral and compile-fail tests, formatting,
-compatible static analysis, and production line/function coverage enforcement.
+The `verify` Actions job runs the same documentation, behavioral, compile-fail,
+formatting, compatible static-analysis, and production coverage gates.
 
 ## Design record
 
-- [Design](docs/design.md): goals, architecture, representation, and boundaries.
+- [Design](docs/design.md): thesis, atom floor, representation, and scope.
 - [Timing](docs/timing.md): authoritative discrete-time execution contract.
-- [Roadmap](docs/roadmap.md): small deliverables, proofs, and checkpoint questions.
-- [Decisions](docs/decisions.md): resolved questions and explicitly deferred choices.
-- [Baseline](docs/baseline.md): lessons grounded in IRATA2 and Rule Lab source.
-- [Status](docs/status.md): current evidence and next work.
+- [Component contracts](docs/component-contracts.md): interface, type-family, acceptance, and regression discipline.
+- [Roadmap](docs/roadmap.md): component dependencies, proofs, and checkpoints.
+- [Decisions](docs/decisions.md): revised direction and withdrawn assumptions.
+- [Baseline](docs/baseline.md): inherited IRATA2 and Rule Lab lessons.
+- [Status](docs/status.md): what runs today and what comes next.
 - [Agent guide](AGENTS.md): contribution workflow and verification rules.
-
-Status and Phase 1 notes distinguish implemented behavior from the larger design.

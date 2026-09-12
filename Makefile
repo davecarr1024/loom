@@ -1,6 +1,6 @@
 .PHONY: check docs configure build test format coverage tidy
 CMAKE_ARGS ?=
-CXX_FILES := include/loom/circuit.h tests/circuit_test.cpp tests/wrong_width.cpp examples/transfer.cpp
+CXX_FILES := include/loom/circuit.h include/loom/structure.h tests/circuit_test.cpp tests/wrong_width.cpp examples/transfer.cpp
 
 docs:
 	python3 scripts/check_docs.py

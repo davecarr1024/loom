@@ -115,4 +115,60 @@ TEST(Circuit, EdgeBudgetStopsWithoutWrappingOrAdvancing) {
   EXPECT_EQ(sim->step({}).error().operation, "edge_limit");
   EXPECT_EQ(sim->step({}).error().operation, "edge_limit");
 }
+
+static_assert(loom::CircuitFacts<Nested>::registers == 4);
+static_assert(loom::CircuitFacts<Nested>::data_inputs == 4);
+static_assert(loom::CircuitFacts<Nested>::data_outputs == 4);
+static_assert(loom::CircuitFacts<Pair>::registers == 2);
+static_assert(!loom::OwnedRoot<Pair &>);
+static_assert(!loom::OwnedRoot<Pair *>);
+static_assert(!loom::RegisterComponent<int>);
+struct CopiedChildren {
+  std::string name;
+  auto children() const { return std::tuple{loom::Register<4>{"copy", 0}}; }
+  auto connections() const { return std::tuple{}; }
+};
+static_assert(!loom::CompositeComponent<CopiedChildren>);
+template <class A, class B>
+concept Connectable = requires(A a, B b) {
+  loom::connect(a, b);
+};
+static_assert(!Connectable<loom::Input<4>, loom::Output<4>>);
+static_assert(!Connectable<loom::Output<4>, loom::Input<8>>);
+
+TEST(Circuit, RejectsInvalidNamesAtAnyDepth) {
+  for (const auto *name : {"", "a.b", "two words", "new\nline"})
+    EXPECT_EQ(loom::Definition<Pair>::create(name).error().operation,
+              "invalid_name");
+  struct BadChild {
+    const std::string name = "root";
+    loom::Register<4> child{"", 0};
+    auto children() const { return std::tie(child); }
+    auto connections() const { return std::tuple{loom::connect(child, child)}; }
+  };
+  EXPECT_EQ(loom::Definition<BadChild>::create().error().path, "root.");
+}
+
+struct Chain {
+  const std::string name = "chain";
+  loom::Register<4> a{"a", 9}, b{"b", 0}, c{"c", 0}, fan{"fan", 0};
+  auto children() const { return std::tie(a, b, c, fan); }
+  auto connections() const {
+    return std::tuple{loom::connect(a.output(), a.input()),
+                      loom::connect(a.output(), b.input()),
+                      loom::connect(b.output(), c.input()),
+                      loom::connect(a.output(), fan.input())};
+  }
+};
+TEST(Circuit, ChainAdvancesOneRegisterPerEdgeAndFansOut) {
+  auto sim =
+      loom::Simulation<Chain>::create(*loom::Definition<Chain>::create());
+  const std::array enables{std::string("chain.b"), std::string("chain.c"),
+                           std::string("chain.fan")};
+  const auto first = sim->step(enables);
+  EXPECT_EQ(first->registers[1].after, 9U);
+  EXPECT_EQ(first->registers[2].after, 0U);
+  EXPECT_EQ(first->registers[3].after, 9U);
+  EXPECT_EQ(sim->step(enables)->registers[2].after, 9U);
+}
 } // namespace
