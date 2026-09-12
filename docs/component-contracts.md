@@ -16,7 +16,7 @@ supported choices are visible in code. Include:
 | Purpose and dependencies | What learning question or parent needs this component? Which established components construct it? |
 | Interface | What does each port mean, in which direction, at what width and bit order? Which instance owns it? |
 | State and initialization | Which child flip-flops store values, and what is their initial state? |
-| Timing | What is visible before an edge, what is sampled, and when is the result observable? |
+| Timing | What is observable immediately after initialization and before/after an edge? What is sampled? Follow the call-scoped observation rules in [timing](timing.md). |
 | Input domain | What combinations/sequences are accepted? What do unused encodings mean? |
 | Failure | Which layer rejects invalid construction or use, with what structured diagnostic and state-preservation guarantee? |
 | Evidence | Which inventory, boundary values, and child paths explain one execution? |

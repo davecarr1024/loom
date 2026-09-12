@@ -26,7 +26,10 @@ time. Show two connected NOT instances and their derived inventory. Prove wrong
 roles/widths and foreign endpoints are rejected at the appropriate layer. Add
 only the combinational planning needed for this circuit; reject a connected
 combinational loop and prove enumeration-independent evaluation. Preserve the
-existing register tests while introducing this boundary.
+existing register tests while introducing this boundary. Prove observation
+immediately after initialization, repeated hypothetical input snapshots without
+advancing time, and retained observation values. Inputs are call-scoped; omitted
+bindings cannot reuse values from a previous observation.
 
 After that acceptance gate, add each remaining floor atom below. Do not resume
 the old direct-arithmetic primitive API.
@@ -44,6 +47,10 @@ inventory and dependency order from owned objects. Test invalid ports, duplicate
 ownership/paths, missing/multiple drivers, foreign bindings, and combinational
 cycles. A DFF breaks a feedback dependency and all DFFs commit simultaneously.
 An invalid input request leaves every stored bit and the edge index unchanged.
+With DFFs present, compare identical edge-0 steps with and without preceding
+observations using different inputs. They must produce identical S[1] and edge
+evidence. Prove post-edge observation reads the newly committed state, while
+retained pre-edge observations and edge evidence keep their original values.
 
 Artifact: truth-table output and a one-bit edge trace with D, old Q, and new Q.
 Checkpoint: can the whole evaluation algorithm be explained using only this floor?

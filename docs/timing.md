@@ -35,6 +35,42 @@ public semantics are an atomic transition. Failure leaves committed state and
 cycle index unchanged. Trace records own snapshots or immutable values, never
 references to buffers that the next step overwrites.
 
+## Pure observations and transient inputs
+
+Let `Eval(S, I)` be pure combinational evaluation of a finalized circuit.
+An observation at committed state S[n] with explicitly supplied inputs I'
+returns `Eval(S[n], I')`. I' may be hypothetical and need not equal the inputs
+used for any edge. Observation is on demand, not inspection of a cached last
+edge result. It does not compute or commit a state transition, advance the
+edge index, consume a protocol transaction, or install inputs for a later call.
+
+Each observation and step supplies a complete input snapshot for the assembly's
+external input ports. The simulator has no implicit mutable "current input"
+register and never fills missing inputs from a previous call. Invalid bindings
+or input values return structured diagnostics without changing state or time.
+A closed circuit with no external inputs uses an empty snapshot.
+
+`step(I[n])` independently evaluates C[n] = `Eval(S[n], I[n])`, validates the
+edge, and commits S[n+1]. Prior observations with any I' must not change that
+result. After a successful step, observing I' evaluates `Eval(S[n+1], I')`;
+it does not return the pre-commit C[n] stored in that edge's evidence. Returned
+observation values own their snapshots, so later observations and edges cannot
+alter them. Internal caching is allowed only if it preserves these semantics.
+
+## Initialization and the first edge
+
+Initialization establishes all of S[0] and sets the next edge index to 0. It
+performs no clock edge or automatic state proposal/commit. It does not require
+an eager combinational evaluation: there is no unique C[0] until inputs I[0]
+are supplied. Initialization must not invent zero values for external inputs.
+
+Immediately after initialization, `observe(I[0])` produces the valid
+C[0] = `Eval(S[0], I[0])`, before any active edge. Repeated observations with
+different snapshots remain at S[0]. The first `step(I[0])` produces edge-0
+evidence and S[1], whether or not observation was called first. This guarantees
+pre-edge observability without making constructor side effects or a settling
+pass part of the circuit's timing contract.
+
 ## Evaluation rules
 
 - Combinational dependencies form a directed acyclic graph after state
