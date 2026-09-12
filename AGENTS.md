@@ -9,7 +9,8 @@ Consult [decisions](docs/decisions.md) for settled boundaries and
 ## Current gate
 
 The register-only Phase 1 baseline is transitional. The revised construction
-plan starts with NOT; do not resume the shelved arithmetic prototype.
+plan has accepted NOT and its typed observation harness; AND is next.
+Read [NOT](docs/not.md) for that API. Do not resume the shelved arithmetic prototype.
 `make check` is the presubmit command: docs, tests,
 negative compilation, formatting, compatible static analysis, and coverage.
 `make test`, `make coverage`, and `make format` are focused commands.

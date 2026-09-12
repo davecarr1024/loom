@@ -1,9 +1,10 @@
 # Discrete-time contract
 
 This is the target execution specification for the construction plan. The
-transitional implementation proves register-only snapshot/commit edges; it has
-no gates, DFF circuits, combinational scheduler, or external data inputs yet.
-See [status](status.md) and [Phase 1](phase-1.md) for implemented evidence.
+[NOT harness](not.md) implements stateless combinational observation with explicit
+transient inputs. DFFs and combinational/stateful edge integration remain future
+work. The transitional [Phase 1](phase-1.md) API separately proves register-only
+snapshot/commit edges. See [status](status.md) for the current boundary.
 
 ## Storage defines the time boundary
 

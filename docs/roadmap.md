@@ -19,20 +19,19 @@ allowed floor. The uncompleted old Phase 2 arithmetic prototype is shelved; its
 unrestricted primitive interface and primitive full adder are not adopted.
 See [status](status.md) and [decisions](decisions.md).
 
-**Next component: NOT, inside the first typed input/output harness.** Define
-one-bit ports and immutable ownership, implement the allowlisted atom, bind an
-explicit input snapshot, and observe both truth-table rows without advancing
-time. Show two connected NOT instances and their derived inventory. Prove wrong
-roles/widths and foreign endpoints are rejected at the appropriate layer. Add
-only the combinational planning needed for this circuit; reject a connected
-combinational loop and prove enumeration-independent evaluation. Preserve the
-existing register tests while introducing this boundary. Prove observation
-immediately after initialization, repeated hypothetical input snapshots without
-advancing time, and retained observation values. Inputs are call-scoped; omitted
-bindings cannot reuse values from a previous observation.
+**NOT is implemented and accepted:** see [its contract and evidence](not.md).
+The first typed harness provides pure pre-edge observation, derived inventory,
+connection/schedule inspection, two-gate composition, invalid topology rejection,
+enumeration independence, transient snapshots, and retained values. The existing
+register baseline remains tested. These are the completed NOT requirements,
+not completion of group A.
 
-After that acceptance gate, add each remaining floor atom below. Do not resume
-the old direct-arithmetic primitive API.
+**Next component: AND.** Extend the fixed atom vocabulary with two typed one-bit
+inputs and one output; derive both dependencies from actual ports. Prove all
+four truth-table rows, repeated same-width input identity, and a containing
+NOT/AND circuit through the existing observation interface. Preserve all NOT
+and register proofs. Then accept OR, constant bit, and DFF individually.
+Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor
 

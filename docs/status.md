@@ -3,10 +3,24 @@
 Loom now asks whether upward component construction can preserve local reasoning,
 reproducible failures, and explanations as digital machines become more complex.
 The [design](design.md), [component contracts](component-contracts.md), and
-[roadmap](roadmap.md) define that direction. This update is a planning reset,
-not an implementation of the new atom floor.
+[roadmap](roadmap.md) define that direction. [NOT](not.md) is the first
+implemented component of the new floor; AND is next.
 
 ## What runs today
+
+The new `simulation::Definition` observes circuits of `components::Not` and
+explicit external input/output boundaries. All logic executes through discovered
+gates and connections. The inventory, wire paths, schedule, and intermediate
+signal values explain the same execution. Observation works immediately after
+finalization, uses a complete call-scoped input snapshot, and owns its results.
+Invalid wiring, cycles, duplicate ownership, and invalid bindings are rejected.
+
+`tests/not_test.cpp` proves single- and two-gate behavior, nested independent
+inputs, fan-out, child/wire order independence, evidence lifetime, empty snapshots,
+and malformed topology. Four new compile-fail cases prove port widths/roles,
+explicit Boolean values, and custom-atom rejection. `./build/not_demo` prints
+the inventory and both rows of the two-NOT truth table with intermediate values.
+
 
 The retained Phase 1 register-only baseline provides typed registers and
 role-specific width-safe connections, nested ownership discovery, compile-time
@@ -28,33 +42,33 @@ edge 0 transfer.source: 42 -> 42
 
 `make check` is the shared local/CI gate. It checks docs, behavioral and negative
 compilation tests, formatting, compatible static analysis, and 100% measured
-production line/function coverage. For this planning update, all nine CTest
-checks pass with 101/101 measured production lines and 63/63 functions covered.
+production line/function coverage. All 23 CTest checks pass with 254/254
+measured production lines and 167/167 functions covered.
 Clang-tidy 14 is explicitly skipped because
 its frontend cannot parse `std::expected`; this is not a static-analysis pass.
 
 ## What is transitional or absent
 
 Atomic wide registers and path-based enable inputs remain baseline mechanisms.
-They are not the accepted long-term atom floor. The new model will use NOT,
-AND, OR, constants, and one-bit DFFs, with registers and larger components
+They are not the accepted long-term atom floor. The new model has NOT;
+AND, OR, constants, and one-bit DFFs remain to be built, with registers and larger components
 executed through child circuits. Register-family concepts and typed control
 families are planned, not implemented.
 
 The unfinished old Phase 2 arithmetic/scheduler experiment was shelved because
 its unrestricted primitives and atomic full adder did not satisfy the revised
 construction premise. It had passed selected tests but not the complete gate.
-It is not part of the supported build. There is currently no combinational
-scheduler, external data-port harness, gate/DFF implementation, ALU, memory,
-controller, CPU, or hierarchical trace expansion.
+It is not part of the supported build. The new fixed-atom NOT scheduler is
+implemented, but no DFF, ALU, memory, controller, or CPU exists. Port-level
+hierarchical observation is available; state/edge and instruction-level trace
+expansion remain future work. The stateless definition has no step operation.
 
 ## Next component and checkpoint
 
-Build NOT with typed external input/output bindings, pure observation, derived
-inventory and scheduling, and a two-NOT containing circuit. Prove its truth
-table, invalid topology rejection, and enumeration independence. Preserve the
-register baseline until composed DFF registers can replace it with equivalent
-behavioral proofs. Then continue upward one accepted component at a time.
+Build AND with two distinct typed bit inputs, one output, and derived dependency
+analysis for both inputs. Prove its four-row truth table and a containing NOT/AND
+circuit while preserving existing proofs. Accept each remaining atom individually;
+stateful observation/edge equivalence belongs to the DFF acceptance gate.
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

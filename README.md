@@ -16,16 +16,14 @@ choices visible. Tests harden each component and its containing assemblies.
 
 ## Status
 
-The construction plan is defined; the new atom floor is not implemented yet.
-The tested register-only Phase 1 baseline remains as transitional code, with
-width-safe role-specific endpoints, nested composition, structural counts, and
-atomic transfer/hold/swap edges. Its atomic wide registers will be replaced by
-composed flip-flops. The unfinished arithmetic prototype has been shelved.
+[NOT and the typed observation harness](docs/not.md) are implemented. A single
+NOT and a two-NOT circuit execute from their actual owned gates and connections,
+with call-scoped inputs, derived inventory/scheduling, and retained signal evidence.
+The next component is AND; the complete atomic floor is not implemented yet.
 
-Next: build and independently prove NOT through typed external ports, pure
-observation, and derived circuit inspection. See [roadmap](docs/roadmap.md)
-for the dependency-ordered construction plan and [status](docs/status.md) for
-current evidence and limitations.
+The tested register-only Phase 1 baseline remains transitional, with atomic wide
+registers to be replaced by composed flip-flops. See [roadmap](docs/roadmap.md)
+for construction order and [status](docs/status.md) for evidence and limitations.
 
 ## Build and verify
 
@@ -36,6 +34,7 @@ for verified tool versions, the clang-tidy compatibility exception, and offline 
 ```sh
 make check
 ./build/transfer
+./build/not_demo
 ```
 
 The `verify` Actions job runs the same documentation, behavioral, compile-fail,

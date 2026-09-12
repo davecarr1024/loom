@@ -68,8 +68,8 @@ possible template instantiation. No production coverage exclusions are used.
 
 Phase 1 now has its register-only execution proof, typed endpoints, structural
 concepts, propagated facts, nested composition, invalid-wiring diagnostics,
-headless artifact, and coverage/toolchain gates. The next component is NOT
-with typed external ports and pure observation. Later, composed DFF registers
+headless artifact, and coverage/toolchain gates. [NOT](not.md) now implements
+typed external ports and pure observation in the new construction model. Later, composed DFF registers
 replace atomic wide registers while retaining these behavioral proofs.
 
 What became visible: the same-width registers can swap or form a pipeline
@@ -79,6 +79,7 @@ Do not generalize the small register-count trait into a property framework yet.
 
 An assembly must expose actual owned child references and stable endpoint
 references; arbitrary user implementations of the structural protocol are
-currently trusted to obey that lifetime contract. General combinational nodes,
-external data ports, and microcode controls are not implemented. Enabled paths
+currently trusted to obey that lifetime contract. This transitional API has
+no combinational nodes, external data ports, or microcode controls; the separate
+NOT construction API supplies the new combinational boundary. Enabled paths
 are a narrow scripting adapter; they do not replace the future typed controls.

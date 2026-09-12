@@ -18,7 +18,8 @@ Rule Lab contributes concrete typed composition and derived structural facts.
 This is a new experiment, without IRATA instruction or API compatibility.
 
 This document specifies the target architecture. [Status](status.md) and
-[Phase 1](phase-1.md) describe the transitional register-only implementation.
+[Phase 1](phase-1.md) describe the transitional register-only implementation;
+[NOT](not.md) documents the first implemented component of the new floor.
 [Roadmap](roadmap.md) owns construction order; [timing](timing.md) owns execution
 semantics; [component contracts](component-contracts.md) owns the acceptance
 and regression discipline. [Decisions](decisions.md) records the change in direction.
