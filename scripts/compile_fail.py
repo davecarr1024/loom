@@ -1,9 +1,12 @@
 """Require the intended static contract diagnostic, not just compilation failure."""
 import subprocess
 import sys
+import os
+from pathlib import Path
 
-compiler, root, *selected = sys.argv[1:]
-case = selected[0] if selected else "wrong_width"
+case = sys.argv[1] if len(sys.argv) > 1 else "wrong_width"
+root = Path(os.environ["TEST_SRCDIR"]) / os.environ["TEST_WORKSPACE"]
+compiler = os.environ.get("CXX", "clang++-19")
 cases = {
     "wrong_width": ("tests/wrong_width.cpp", ("connect", "deduced conflicting")),
     "logic_width": ("tests/compile_fail/logic_width.cpp", ("connect", "deduced conflicting")),
@@ -13,7 +16,7 @@ cases = {
 }
 source, required = cases[case]
 result = subprocess.run(
-    [compiler, "-std=c++23", "-fsyntax-only", "-I" + root + "/include", root + "/" + source],
+    [compiler, "-std=c++23", "-fsyntax-only", "-I" + str(root / "include"), str(root / source)],
     capture_output=True, text=True)
 if result.returncode == 0 or any(text not in result.stderr for text in required):
     sys.exit(f"Expected {case} diagnostic containing {required}:\n" + result.stderr)

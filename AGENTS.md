@@ -9,13 +9,19 @@ Consult [decisions](docs/decisions.md) for settled boundaries and
 ## Current gate
 
 The register-only Phase 1 baseline is transitional. The revised construction
-plan has accepted NOT and its typed observation harness; AND is next.
-Read [NOT](docs/not.md) for that API. Do not resume the shelved arithmetic prototype.
-`make check` is the presubmit command: docs, tests,
-negative compilation, formatting, compatible static analysis, and coverage.
-`make test`, `make coverage`, and `make format` are focused commands.
+plan has accepted NOT, AND, OR, and their typed observation harness; a constant
+bit is next. Read [NOT](docs/not.md), [AND](docs/and.md), and [OR](docs/or.md)
+for those APIs. Do not resume the shelved arithmetic prototype.
+`./scripts/check.sh` is the presubmit command. It runs `bazel test //...`,
+then Bazel LCOV coverage and the 100% production line/function gate.
+`bazel test //...` runs behavioral, docs, compile-fail, formatting, and
+static-analysis checks. Run `bazel run //:format` to apply C++ formatting. Use
+`bazel run //:not_demo`, `bazel run //:and_demo`, `bazel run //:or_demo`, and
+`bazel run //:transfer` to run the examples. The workspace pins Clang 19 through
+`.bazelrc`; install Bazelisk and Clang/LLVM 19, including clang-format,
+clang-tidy, llvm-cov, and llvm-profdata, first.
 
-Read [Phase 1](docs/phase-1.md) for the current API and toolchain. Clang-tidy
+Read [Phase 1](docs/phase-1.md) for the transitional API and toolchain history. Clang-tidy
 below 16 is explicitly skipped for std::expected frontend incompatibility;
 do not describe that as a pass. Follow the roadmap one component at a time.
 

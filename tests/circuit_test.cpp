@@ -130,9 +130,7 @@ struct CopiedChildren {
 };
 static_assert(!loom::CompositeComponent<CopiedChildren>);
 template <class A, class B>
-concept Connectable = requires(A a, B b) {
-  loom::connect(a, b);
-};
+concept Connectable = requires(A a, B b) { loom::connect(a, b); };
 static_assert(!Connectable<loom::Input<4>, loom::Output<4>>);
 static_assert(!Connectable<loom::Output<4>, loom::Input<8>>);
 

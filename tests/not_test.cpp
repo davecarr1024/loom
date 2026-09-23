@@ -3,7 +3,9 @@
 #include <gtest/gtest.h>
 
 namespace {
+using loom::components::And;
 using loom::components::Not;
+using loom::components::Or;
 using loom::simulation::Definition;
 using loom::simulation::Error;
 using loom::simulation::Kind;
@@ -262,6 +264,158 @@ TEST(Not, SelfFeedbackIsRejected) {
   EXPECT_EQ(Definition<SelfLoop>::create().error(),
             (Error{"combinational_cycle", "self.gate.in"}));
 }
+struct AndOnly {
+  const std::string name = "and_only";
+  ExternalInput left{"left"}, right{"right"};
+  And gate{"gate"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(left, right, gate, output); }
+  auto connections() const {
+    return std::tuple{connect(left.output(), gate.left()),
+                      connect(right.output(), gate.right()),
+                      connect(gate.output(), output.input())};
+  }
+};
+TEST(And, TruthTableUsesDistinctInputPortsAndDerivedDependencies) {
+  const auto definition = Definition<AndOnly>::create();
+  ASSERT_TRUE(definition);
+  EXPECT_EQ((*definition)->connections(),
+            (std::vector<loom::simulation::WireInfo>{
+                {"and_only.left.out", "and_only.gate.left"},
+                {"and_only.right.out", "and_only.gate.right"},
+                {"and_only.gate.out", "and_only.output.in"}}));
+  EXPECT_EQ((*definition)->schedule(),
+            (std::vector<std::string>{"and_only.gate", "and_only.output"}));
+  for (const bool left : {false, true})
+    for (const bool right : {false, true}) {
+      const std::array inputs{(*definition)->root().left.bind(Bit{left}),
+                              (*definition)->root().right.bind(Bit{right})};
+      const auto observation = (*definition)->observe(inputs);
+      ASSERT_TRUE(observation);
+      const auto find = [&](const std::string &path) {
+        return std::ranges::find(observation->signals, path,
+                                 &loom::simulation::Signal::path)
+            ->value.high();
+      };
+      EXPECT_EQ(find("and_only.gate.left"), left);
+      EXPECT_EQ(find("and_only.gate.right"), right);
+      EXPECT_EQ(find("and_only.output.in"), left && right);
+    }
+}
+
+struct NotAnd {
+  const std::string name = "not_and";
+  ExternalInput input{"input"}, other{"other"};
+  Not invert{"invert"};
+  And gate{"gate"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(input, other, invert, gate, output); }
+  auto connections() const {
+    return std::tuple{connect(input.output(), invert.input()),
+                      connect(invert.output(), gate.left()),
+                      connect(other.output(), gate.right()),
+                      connect(gate.output(), output.input())};
+  }
+};
+TEST(And, ComposesWithNotThroughTheSameObservedCircuit) {
+  const auto definition = Definition<NotAnd>::create();
+  ASSERT_TRUE(definition);
+  for (const bool input : {false, true})
+    for (const bool other : {false, true}) {
+      const std::array bindings{(*definition)->root().input.bind(Bit{input}),
+                                (*definition)->root().other.bind(Bit{other})};
+      const auto observed = (*definition)->observe(bindings);
+      ASSERT_TRUE(observed);
+      EXPECT_EQ(observed->signals.back().value.high(), !input && other);
+    }
+}
+
+struct OrOnly {
+  const std::string name = "or_only";
+  ExternalInput left{"left"}, right{"right"};
+  Or gate{"gate"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(left, right, gate, output); }
+  auto connections() const {
+    return std::tuple{connect(left.output(), gate.left()),
+                      connect(right.output(), gate.right()),
+                      connect(gate.output(), output.input())};
+  }
+};
+TEST(Or, TruthTableUsesDistinctInputPortsAndDerivedDependencies) {
+  const auto definition = Definition<OrOnly>::create();
+  ASSERT_TRUE(definition);
+  const auto gate =
+      std::ranges::find((*definition)->inventory(), "or_only.gate",
+                        &loom::simulation::ComponentInfo::path);
+  ASSERT_NE(gate, (*definition)->inventory().end());
+  EXPECT_EQ(gate->kind, Kind::or_gate);
+  EXPECT_EQ((*definition)->connections(),
+            (std::vector<loom::simulation::WireInfo>{
+                {"or_only.left.out", "or_only.gate.left"},
+                {"or_only.right.out", "or_only.gate.right"},
+                {"or_only.gate.out", "or_only.output.in"}}));
+  EXPECT_EQ((*definition)->schedule(),
+            (std::vector<std::string>{"or_only.gate", "or_only.output"}));
+  for (const bool left : {false, true})
+    for (const bool right : {false, true}) {
+      const std::array inputs{(*definition)->root().left.bind(Bit{left}),
+                              (*definition)->root().right.bind(Bit{right})};
+      const auto observation = (*definition)->observe(inputs);
+      ASSERT_TRUE(observation);
+      const auto find = [&](const std::string &path) {
+        return std::ranges::find(observation->signals, path,
+                                 &loom::simulation::Signal::path)
+            ->value.high();
+      };
+      EXPECT_EQ(find("or_only.gate.left"), left);
+      EXPECT_EQ(find("or_only.gate.right"), right);
+      EXPECT_EQ(find("or_only.output.in"), left || right);
+    }
+}
+
+struct NotOr {
+  const std::string name = "not_or";
+  ExternalInput input{"input"}, other{"other"};
+  Not invert{"invert"};
+  Or gate{"gate"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(input, other, invert, gate, output); }
+  auto connections() const {
+    return std::tuple{connect(input.output(), invert.input()),
+                      connect(invert.output(), gate.left()),
+                      connect(other.output(), gate.right()),
+                      connect(gate.output(), output.input())};
+  }
+};
+TEST(Or, ComposesWithNotThroughTheSameObservedCircuit) {
+  const auto definition = Definition<NotOr>::create();
+  ASSERT_TRUE(definition);
+  for (const bool input : {false, true})
+    for (const bool other : {false, true}) {
+      const std::array bindings{(*definition)->root().input.bind(Bit{input}),
+                                (*definition)->root().other.bind(Bit{other})};
+      const auto observed = (*definition)->observe(bindings);
+      ASSERT_TRUE(observed);
+      EXPECT_EQ(observed->signals.back().value.high(), !input || other);
+    }
+}
+struct AndRightCycle {
+  const std::string name = "and_right_cycle";
+  ExternalInput left{"left"};
+  And gate{"gate"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(left, gate, output); }
+  auto connections() const {
+    return std::tuple{connect(left.output(), gate.left()),
+                      connect(gate.output(), gate.right()),
+                      connect(gate.output(), output.input())};
+  }
+};
+TEST(And, CycleErrorNamesTheActualRightInputPort) {
+  EXPECT_EQ(Definition<AndRightCycle>::create().error(),
+            (Error{"combinational_cycle", "and_right_cycle.gate.right"}));
+}
 struct LiteralName {
   const char *name = "literal";
   auto children() const { return std::tuple{}; }
@@ -270,12 +424,14 @@ struct LiteralName {
 static_assert(!loom::simulation::CircuitRoot<LiteralName>);
 static_assert(!std::is_constructible_v<Bit, unsigned>);
 static_assert(!std::is_copy_constructible_v<Not>);
+static_assert(!std::is_copy_constructible_v<And>);
+static_assert(!std::is_copy_constructible_v<Or>);
 static_assert(!loom::simulation::CircuitRoot<Inverter &>);
 static_assert(!loom::simulation::CircuitRoot<Inverter *>);
+static_assert(!loom::simulation::CircuitRoot<And &>);
+static_assert(!loom::simulation::CircuitRoot<Or &>);
 template <class A, class B>
-concept Connectable = requires(const A &a, const B &b) {
-  connect(a, b);
-};
+concept Connectable = requires(const A &a, const B &b) { connect(a, b); };
 static_assert(
     !Connectable<loom::structure::Input<1>, loom::structure::Output<1>>);
 static_assert(

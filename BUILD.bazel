@@ -1,0 +1,133 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "loom",
+    hdrs = glob(["include/**/*.h"]),
+    strip_include_prefix = "include",
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+)
+
+filegroup(
+    name = "loom_headers",
+    srcs = glob(["include/**/*.h"]),
+)
+
+cc_test(
+    name = "circuit_tests",
+    srcs = ["tests/circuit_test.cpp", "tests/not_test.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom", "@googletest//:gtest_main"],
+)
+
+cc_binary(
+    name = "not_demo",
+    srcs = ["examples/not.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
+    name = "or_demo",
+    srcs = ["examples/or.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
+    name = "and_demo",
+    srcs = ["examples/and.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
+    name = "transfer",
+    srcs = ["examples/transfer.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+filegroup(
+    name = "docs",
+    srcs = glob(["*.md", "docs/*.md"]),
+)
+
+py_test(
+    name = "docs_check",
+    srcs = ["scripts/check_docs.py"],
+    main = "scripts/check_docs.py",
+    data = [":docs", ":cpp_sources"],
+)
+
+filegroup(
+    name = "compile_fail_sources",
+    srcs = ["tests/wrong_width.cpp"] + glob(["tests/compile_fail/*.cpp"]),
+)
+
+py_test(
+    name = "wrong_width",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["wrong_width"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+py_test(
+    name = "logic_width",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["logic_width"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+py_test(
+    name = "logic_role",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["logic_role"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+py_test(
+    name = "numeric_bit",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["numeric_bit"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+py_test(
+    name = "custom_atom",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["custom_atom"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+sh_binary(
+    name = "format",
+    srcs = ["scripts/format.sh"],
+    args = ["$(locations :cpp_sources)"],
+    data = [":cpp_sources"],
+)
+
+sh_test(
+    name = "format_check",
+    srcs = ["scripts/check_format.sh"],
+    args = ["$(locations :cpp_sources)"],
+    data = [":cpp_sources"],
+)
+
+filegroup(
+    name = "cpp_sources",
+    srcs = glob(["examples/*.cpp", "include/**/*.h", "tests/*.cpp", "tests/compile_fail/*.cpp"]),
+)
+
+py_test(
+    name = "static_analysis",
+    srcs = ["scripts/tidy.py"],
+    main = "scripts/tidy.py",
+    data = [":cpp_sources", ":loom"],
+)

@@ -11,8 +11,12 @@
 
 namespace loom {
 template <unsigned Width> struct Register;
-template <unsigned Width> struct Input { const Register<Width> *owner; };
-template <unsigned Width> struct Output { const Register<Width> *owner; };
+template <unsigned Width> struct Input {
+  const Register<Width> *owner;
+};
+template <unsigned Width> struct Output {
+  const Register<Width> *owner;
+};
 
 template <unsigned Width> struct Register {
   static_assert(Width > 0 && Width <= 64, "register width must be 1..64");
@@ -74,8 +78,7 @@ template <class T> struct CircuitFacts {
         return (std::size_t{0} + ... +
                 CircuitFacts<std::remove_cvref_t<
                     std::tuple_element_t<I, Children>>>::registers);
-      }
-      (std::make_index_sequence<std::tuple_size_v<Children>>{});
+      }(std::make_index_sequence<std::tuple_size_v<Children>>{});
     }
   }();
   static constexpr std::size_t data_inputs = registers;

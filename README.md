@@ -16,29 +16,36 @@ choices visible. Tests harden each component and its containing assemblies.
 
 ## Status
 
-[NOT and the typed observation harness](docs/not.md) are implemented. A single
-NOT and a two-NOT circuit execute from their actual owned gates and connections,
-with call-scoped inputs, derived inventory/scheduling, and retained signal evidence.
-The next component is AND; the complete atomic floor is not implemented yet.
+[NOT, AND, OR, and the typed observation harness](docs/not.md) are implemented. A
+single NOT, AND, and OR, plus their composed circuits, execute from owned gates
+and connections, with call-scoped inputs, derived inventory/scheduling, and
+retained signal evidence. The next component is a constant bit; the complete
+atomic floor is not implemented yet.
 
 The tested register-only Phase 1 baseline remains transitional, with atomic wide
 registers to be replaced by composed flip-flops. See [roadmap](docs/roadmap.md)
 for construction order and [status](docs/status.md) for evidence and limitations.
+See [AND](docs/and.md) and [OR](docs/or.md) for their two-input contracts and
+evidence.
 
 ## Build and verify
 
-Requires GCC 12/C++23, CMake, Make, Python 3.9+, lcov, clang-format, and
-clang-tidy. CMake fetches GoogleTest v1.14.0. See [Phase 1](docs/phase-1.md)
-for verified tool versions, the clang-tidy compatibility exception, and offline setup.
+Requires Bazelisk, Clang/LLVM 19 (including clang-format, clang-tidy,
+llvm-cov, and llvm-profdata), and Python 3.9+. Bazel resolves GoogleTest
+through Bzlmod.
 
 ```sh
-make check
-./build/transfer
-./build/not_demo
+./scripts/check.sh
+bazel run //:transfer
+bazel run //:not_demo
+bazel run //:or_demo
+bazel run //:and_demo
 ```
 
-The `verify` Actions job runs the same documentation, behavioral, compile-fail,
-formatting, compatible static-analysis, and production coverage gates.
+Run `bazel run //:format` to format C++ sources.
+
+The `verify` Actions job runs the same Bazel documentation, behavioral,
+compile-fail, formatting, compatible static-analysis, and production coverage gates.
 
 ## Design record
 

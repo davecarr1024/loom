@@ -4,14 +4,16 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: sudo apt-get update && sudo apt-get install -y g++-12 lcov clang-format-14 clang-tidy-14
-      - run: make check
-        env:
-          CXX: g++-12
-          GCOV: gcov-12
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - run: sudo apt-get update && sudo apt-get install -y clang-19 clang-format-19 clang-tidy-19 llvm-19
+      - run: ./scripts/check.sh

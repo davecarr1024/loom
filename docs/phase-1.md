@@ -49,16 +49,13 @@ root/child constraints, and incompatible endpoint roles. `wrong_width.cpp`
 must fail compilation with a conflicting `connect` deduction diagnostic.
 `examples/transfer.cpp` is the first headless artifact, transferring 42.
 
-Run `make check`, or separately `make test`, `make coverage`, `make format`.
-Then run `./build/transfer`. Local tools are GCC 12.2, CMake, Python 3.11,
-lcov 1.16, and clang-format 14. GoogleTest v1.14.0 is fetched by CMake.
-CI pairs GCC 12 with `GCOV=gcov-12`; `gcov` must match the compiler that
-produced the instrumentation. The first CI run exposed a default-gcov-11
-mismatch after its behavioral tests passed. Coverage accepts a `GCOV` override.
-An offline checkout can be supplied with
-`CMAKE_ARGS=-DFETCHCONTENT_SOURCE_DIR_GOOGLETEST=/absolute/path/to/googletest`.
-Clang-tidy below 16 is explicitly skipped due to std::expected frontend
-incompatibility, following Rule Lab; newer versions must run successfully.
+The transitional baseline was originally checked with `make check` and CMake,
+GCC 12.2, lcov, and clang-format 14. Those commands and compiler notes record
+that historical validation environment; the current project uses Bazel and
+Clang 19 through `./scripts/check.sh`. The original CI exposed a mismatched
+default gcov version, which motivated keeping compiler and coverage tooling
+aligned. Clang-tidy below 16 is explicitly skipped due to std::expected
+frontend incompatibility; this repository now runs clang-tidy 19.
 
 Coverage measures instantiated production header lines/functions, excluding
 tests, third-party code, and the example CLI adapter. It does not prove every

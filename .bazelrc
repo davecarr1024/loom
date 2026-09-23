@@ -1,0 +1,9 @@
+build --repo_env=CC=clang-19
+test --test_env=CXX=clang++-19
+coverage --repo_env=BAZEL_USE_LLVM_NATIVE_COVERAGE=1
+coverage --repo_env=GCOV=llvm-profdata-19
+coverage --repo_env=BAZEL_LLVM_COV=llvm-cov-19
+coverage --repo_env=BAZEL_LLVM_PROFDATA=llvm-profdata-19
+coverage --experimental_use_llvm_covmap
+coverage --experimental_generate_llvm_lcov
+coverage --repo_env=COVERAGE_GCOV_PATH=/usr/bin/llvm-profdata-19

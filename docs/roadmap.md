@@ -6,7 +6,7 @@ prove composition and feed regression cases back down; a machine milestone does
 not replace its components' individual acceptance gates.
 
 Every component follows [contracts and hardening](component-contracts.md): define,
-construct, test alone, test in a parent, explain the execution, run `make check`,
+construct, test alone, test in a parent, explain the execution, run `./scripts/check.sh`,
 and complete the [push-boundary review](../AGENTS.md). Work through each group's
 components individually. The groups below express dependencies and learning
 questions, not permission to implement a whole library at once.
@@ -26,11 +26,11 @@ enumeration independence, transient snapshots, and retained values. The existing
 register baseline remains tested. These are the completed NOT requirements,
 not completion of group A.
 
-**Next component: AND.** Extend the fixed atom vocabulary with two typed one-bit
-inputs and one output; derive both dependencies from actual ports. Prove all
-four truth-table rows, repeated same-width input identity, and a containing
-NOT/AND circuit through the existing observation interface. Preserve all NOT
-and register proofs. Then accept OR, constant bit, and DFF individually.
+**NOT, AND, and OR are implemented and accepted:** see [NOT](not.md),
+[AND](and.md), and [OR](or.md). AND and OR each add two separately identified
+one-bit input ports and derived multi-input dependencies. Their four-row truth
+tables and containing circuits use the existing observation interface. Preserve
+these and register proofs. **Next: constant bit**, then DFF individually.
 Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor

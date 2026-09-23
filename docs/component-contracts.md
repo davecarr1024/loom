@@ -89,13 +89,13 @@ framework or proof assistant built in advance.
    where relevant. Cover meaningful invalid wiring and protocol cases.
 6. Produce a runnable evidence artifact and a concise explanation that can expand
    a parent boundary into the responsible child ports/state on the same edge.
-7. Run `make check`, update docs and status, perform the push-boundary reviews,
+7. Run `./scripts/check.sh`, update docs and status, perform the push-boundary reviews,
    and publish only the checked contents. The component then becomes a dependency.
 
 Do not require a CPU to test a leaf. Do not call a declared latency a proof.
 Coverage remains 100% measured production lines/functions with narrowly
 justified exceptions only; meaningful behavioral tests are a separate obligation.
-Check type guarantees with negative compilation cases that fail for the intended
+   Check type guarantees with negative compilation cases that fail for the intended
 reason. Prefer independent Boolean/arithmetic oracles to expected values copied
 from the circuit's implementation.
 
@@ -112,7 +112,8 @@ Given a failing assembly and input script:
 4. Add a leaf, temporal, or integration regression at the actual fault boundary.
    If both children satisfy their contracts, repair the parent or its contract.
 5. Fix the implementation or explicitly revise the contract and all affected
-   consumers. Rerun the original scenario, affected parents, and `make check`.
+   consumers. Rerun the original scenario, affected parents, and
+   `./scripts/check.sh`.
 6. Record what the failure taught about composition and whether the interface
    prevented, exposed, or obscured the mistake.
 
