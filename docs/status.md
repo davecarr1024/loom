@@ -3,27 +3,29 @@
 Loom now asks whether upward component construction can preserve local reasoning,
 reproducible failures, and explanations as digital machines become more complex.
 The [design](design.md), [component contracts](component-contracts.md), and
-[roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md), and
-[OR](or.md) are the first implemented components of the new floor; a constant
-bit is next.
+[roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
+[OR](or.md), and [constant bit](constant-bit.md) are implemented; the
+initialized DFF is next.
 
 ## What runs today
 
 The new `simulation::Definition` observes circuits of `components::Not`,
-`components::And`, `components::Or`, and explicit external input/output boundaries. All logic executes through discovered
+`components::And`, `components::Or`, `components::ConstantBit`, and explicit
+external input/output boundaries. All logic executes through discovered
 gates and connections. The inventory, wire paths, schedule, and intermediate
 signal values explain the same execution. Observation works immediately after
 finalization, uses a complete call-scoped input snapshot, and owns its results.
 Invalid wiring, cycles, duplicate ownership, and invalid bindings are rejected.
 
-`tests/not_test.cpp` proves NOT, AND, and OR truth tables, NOT/AND and NOT/OR
+`tests/not_test.cpp` proves NOT, AND, and OR truth tables, constant zero and one,
+source scheduling and parent composition, NOT/AND and NOT/OR
 composition, nested independent inputs, fan-out, child/wire order independence,
 evidence lifetime, empty snapshots,
 and malformed topology. Four new compile-fail cases prove port widths/roles,
 explicit Boolean values, and custom-atom rejection. `bazel run //:not_demo` prints
 the inventory and both rows of the two-NOT truth table with intermediate values.
 `bazel run //:and_demo` and `bazel run //:or_demo` print the gates' exhaustive
-truth tables.
+truth tables; `bazel run //:constant_bit_demo` observes both constant values.
 
 
 The retained Phase 1 register-only baseline provides typed registers and
@@ -55,10 +57,10 @@ contains no per-file or per-line exceptions.
 ## What is transitional or absent
 
 Atomic wide registers and path-based enable inputs remain baseline mechanisms.
-They are not the accepted long-term atom floor. The new model has NOT, AND, and
-OR; constants and one-bit DFFs remain to be built, with registers and larger components
-executed through child circuits. Register-family concepts and typed control
-families are planned, not implemented.
+They are not the accepted long-term atom floor. The new model has NOT, AND, OR,
+and a constant bit; one-bit DFFs remain to be built, with registers and larger
+components executed through child circuits. Register-family concepts and typed
+control families are planned, not implemented.
 
 The unfinished old Phase 2 arithmetic/scheduler experiment was shelved because
 its unrestricted primitives and atomic full adder did not satisfy the revised
@@ -70,10 +72,10 @@ expansion remain future work. The stateless definition has no step operation.
 
 ## Next component and checkpoint
 
-Build a constant bit with an immutable explicit value and no input ports. Prove
-both values, its source scheduling behavior, and parent composition while
-preserving the gate and register proofs. Accept each remaining atom individually;
-stateful observation/edge equivalence belongs to the DFF acceptance gate.
+Build an initialized one-bit DFF. Prove initialization, sampling, repeated edges,
+independent simulations, and simultaneous commits while preserving all gate and
+constant-bit proofs. Stateful observation and edge equivalence belong to this
+acceptance gate.
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

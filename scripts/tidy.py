@@ -10,8 +10,8 @@ if major and int(major.group(1)) < 16:
     print("SKIPPED clang-tidy: frontend older than 16 cannot parse std::expected")
 else:
     root = Path(os.environ["TEST_SRCDIR"]) / os.environ["TEST_WORKSPACE"]
-    sources = ["examples/transfer.cpp", "examples/not.cpp",
-               "examples/and.cpp", "examples/or.cpp"]
+    sources = sorted(str(path.relative_to(root)) for path in
+                     (root / "examples").glob("*.cpp"))
     subprocess.run(["clang-tidy-19", "--warnings-as-errors=*",
                     "--extra-arg=-std=c++23", f"--extra-arg=-I{root / 'include'}",
                     *[str(root / source) for source in sources]], check=True)

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "loom/components/and.h"
+#include "loom/components/constant_bit.h"
 #include "loom/components/not.h"
 #include "loom/components/or.h"
 #include <algorithm>
 #include <expected>
 #include <memory>
+#include <optional>
 #include <span>
 #include <tuple>
 #include <type_traits>
@@ -23,7 +25,8 @@ enum class Kind {
   external_output,
   not_gate,
   and_gate,
-  or_gate
+  or_gate,
+  constant_bit
 };
 struct ComponentInfo {
   std::string path;
@@ -60,6 +63,7 @@ template <class T>
 concept Atom =
     std::same_as<T, components::Not> || std::same_as<T, components::And> ||
     std::same_as<T, components::Or> ||
+    std::same_as<T, components::ConstantBit> ||
     std::same_as<T, structure::ExternalInput> ||
     std::same_as<T, structure::ExternalOutput>;
 struct Node {
@@ -67,6 +71,7 @@ struct Node {
   ComponentInfo info;
   std::vector<std::pair<const structure::Input<1> *, std::string>> inputs;
   const structure::Output<1> *output = nullptr;
+  std::optional<bool> constant;
 };
 // One derived representation drives validation, execution, and evidence. No
 // callable registry exists: only exact allowlisted types supply atom behavior.
@@ -91,28 +96,35 @@ struct Plan {
     if (std::ranges::find(nodes, &node, &Node::identity) != nodes.end())
       return std::unexpected(Error{"duplicate_component", path});
     if constexpr (std::same_as<T, components::Not>) {
-      Node discovered{&node, {path, Kind::not_gate}, {}, &node.output()};
+      Node discovered{&node, {path, Kind::not_gate}, {}, &node.output(), {}};
       discovered.inputs.emplace_back(&node.input(), "in");
       nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, components::And>) {
-      Node discovered{&node, {path, Kind::and_gate}, {}, &node.output()};
+      Node discovered{&node, {path, Kind::and_gate}, {}, &node.output(), {}};
       discovered.inputs.emplace_back(&node.left(), "left");
       discovered.inputs.emplace_back(&node.right(), "right");
       nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, components::Or>) {
-      Node discovered{&node, {path, Kind::or_gate}, {}, &node.output()};
+      Node discovered{&node, {path, Kind::or_gate}, {}, &node.output(), {}};
       discovered.inputs.emplace_back(&node.left(), "left");
       discovered.inputs.emplace_back(&node.right(), "right");
       nodes.push_back(std::move(discovered));
+    } else if constexpr (std::same_as<T, components::ConstantBit>) {
+      Node discovered{&node,
+                      {path, Kind::constant_bit},
+                      {},
+                      &node.output(),
+                      node.fixed_value.high()};
+      nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, structure::ExternalInput>) {
       nodes.push_back(
-          {&node, {path, Kind::external_input}, {}, &node.output()});
+          {&node, {path, Kind::external_input}, {}, &node.output(), {}});
     } else if constexpr (std::same_as<T, structure::ExternalOutput>) {
-      Node discovered{&node, {path, Kind::external_output}, {}, nullptr};
+      Node discovered{&node, {path, Kind::external_output}, {}, nullptr, {}};
       discovered.inputs.emplace_back(&node.input(), "in");
       nodes.push_back(std::move(discovered));
     } else {
-      nodes.push_back({&node, {path, Kind::composite}, {}, nullptr});
+      nodes.push_back({&node, {path, Kind::composite}, {}, nullptr, {}});
       std::expected<void, Error> valid;
       if constexpr (std::tuple_size_v<decltype(node.children())> != 0) {
         std::apply(
@@ -230,6 +242,9 @@ struct Plan {
   std::expected<Observation, Error>
   observe(std::span<const structure::Binding> inputs) const {
     std::vector<bool> values(nodes.size(), false), bound(nodes.size(), false);
+    for (std::size_t i = 0; i < nodes.size(); ++i)
+      if (nodes[i].constant)
+        values[i] = *nodes[i].constant;
     for (const auto &binding : inputs) {
       const auto found =
           std::ranges::find(nodes, binding.port(), &Node::output);

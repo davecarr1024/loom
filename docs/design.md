@@ -19,8 +19,8 @@ This is a new experiment, without IRATA instruction or API compatibility.
 
 This document specifies the target architecture. [Status](status.md) and
 [Phase 1](phase-1.md) describe the transitional register-only implementation;
-[NOT](not.md), [AND](and.md), and [OR](or.md) document the first implemented
-components of the new floor.
+[NOT](not.md), [AND](and.md), [OR](or.md), and [constant bit](constant-bit.md)
+document the implemented components of the new floor.
 [Roadmap](roadmap.md) owns construction order; [timing](timing.md) owns execution
 semantics; [component contracts](component-contracts.md) owns the acceptance
 and regression discipline. [Decisions](decisions.md) records the change in direction.

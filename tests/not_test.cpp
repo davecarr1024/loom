@@ -4,6 +4,7 @@
 
 namespace {
 using loom::components::And;
+using loom::components::ConstantBit;
 using loom::components::Not;
 using loom::components::Or;
 using loom::simulation::Definition;
@@ -416,6 +417,56 @@ TEST(And, CycleErrorNamesTheActualRightInputPort) {
   EXPECT_EQ(Definition<AndRightCycle>::create().error(),
             (Error{"combinational_cycle", "and_right_cycle.gate.right"}));
 }
+
+struct InputAndConstant {
+  const std::string name = "input_and_constant";
+  ExternalInput input{"input"};
+  ConstantBit one{"one", Bit{true}};
+  And gate{"gate"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(input, one, gate, output); }
+  auto connections() const {
+    return std::tuple{connect(input.output(), gate.left()),
+                      connect(one.output(), gate.right()),
+                      connect(gate.output(), output.input())};
+  }
+};
+
+TEST(ConstantBit, BothValuesAreInputlessSourcesAndNotScheduled) {
+  for (const bool high : {false, true}) {
+    const auto definition =
+        Definition<ConstantBit>::create("constant", Bit{high});
+    ASSERT_TRUE(definition);
+    EXPECT_EQ((*definition)->inventory(),
+              (std::vector<loom::simulation::ComponentInfo>{
+                  {"constant", Kind::constant_bit}}));
+    EXPECT_TRUE((*definition)->schedule().empty());
+    const auto observed = (*definition)->observe({});
+    ASSERT_TRUE(observed);
+    EXPECT_EQ(observed->signals, (std::vector<loom::simulation::Signal>{
+                                     {"constant.out", Bit{high}}}));
+  }
+}
+
+TEST(ConstantBit, ComposesWithInputAndGateInParent) {
+  const auto definition = Definition<InputAndConstant>::create();
+  ASSERT_TRUE(definition);
+  EXPECT_EQ((*definition)->schedule(),
+            (std::vector<std::string>{"input_and_constant.gate",
+                                      "input_and_constant.output"}));
+  for (const bool input : {false, true}) {
+    const std::array binding{(*definition)->root().input.bind(Bit{input})};
+    const auto observed = (*definition)->observe(binding);
+    ASSERT_TRUE(observed);
+    const auto &signals = observed->signals;
+    const auto one = std::ranges::find(signals, "input_and_constant.one.out",
+                                       &loom::simulation::Signal::path);
+    ASSERT_NE(one, signals.end());
+    EXPECT_TRUE(one->value.high());
+    EXPECT_EQ(signals.back().value.high(), input);
+  }
+}
+
 struct LiteralName {
   const char *name = "literal";
   auto children() const { return std::tuple{}; }
@@ -426,6 +477,7 @@ static_assert(!std::is_constructible_v<Bit, unsigned>);
 static_assert(!std::is_copy_constructible_v<Not>);
 static_assert(!std::is_copy_constructible_v<And>);
 static_assert(!std::is_copy_constructible_v<Or>);
+static_assert(!std::is_copy_constructible_v<ConstantBit>);
 static_assert(!loom::simulation::CircuitRoot<Inverter &>);
 static_assert(!loom::simulation::CircuitRoot<Inverter *>);
 static_assert(!loom::simulation::CircuitRoot<And &>);

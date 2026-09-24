@@ -9,15 +9,17 @@ Consult [decisions](docs/decisions.md) for settled boundaries and
 ## Current gate
 
 The register-only Phase 1 baseline is transitional. The revised construction
-plan has accepted NOT, AND, OR, and their typed observation harness; a constant
-bit is next. Read [NOT](docs/not.md), [AND](docs/and.md), and [OR](docs/or.md)
-for those APIs. Do not resume the shelved arithmetic prototype.
+plan has accepted NOT, AND, OR, constant bit, and their typed observation
+harness; the initialized DFF is next. Read [NOT](docs/not.md), [AND](docs/and.md),
+[OR](docs/or.md), and [constant bit](docs/constant-bit.md) for those APIs. Do
+not resume the shelved arithmetic prototype.
 `./scripts/check.sh` is the presubmit command. It runs `bazel test //...`,
 then Bazel LCOV coverage and the 100% production line/function gate.
 `bazel test //...` runs behavioral, docs, compile-fail, formatting, and
 static-analysis checks. Run `bazel run //:format` to apply C++ formatting. Use
 `bazel run //:not_demo`, `bazel run //:and_demo`, `bazel run //:or_demo`, and
-`bazel run //:transfer` to run the examples. The workspace pins Clang 19 through
+`bazel run //:constant_bit_demo`, and `bazel run //:transfer` to run the
+examples. The workspace pins Clang 19 through
 `.bazelrc`; install Bazelisk and Clang/LLVM 19, including clang-format,
 clang-tidy, llvm-cov, and llvm-profdata, first.
 

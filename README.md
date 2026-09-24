@@ -16,11 +16,12 @@ choices visible. Tests harden each component and its containing assemblies.
 
 ## Status
 
-[NOT, AND, OR, and the typed observation harness](docs/not.md) are implemented. A
-single NOT, AND, and OR, plus their composed circuits, execute from owned gates
-and connections, with call-scoped inputs, derived inventory/scheduling, and
-retained signal evidence. The next component is a constant bit; the complete
-atomic floor is not implemented yet.
+[NOT, AND, OR, constant bit, and the typed observation harness](docs/not.md)
+are implemented. Single NOT, AND, OR, and constant bit atoms, plus their
+composed circuits, execute from owned components and connections, with
+call-scoped inputs, derived inventory/scheduling, and retained signal evidence.
+The one-bit DFF is next; the complete atomic floor is not implemented yet. See
+[constant bit](docs/constant-bit.md).
 
 The tested register-only Phase 1 baseline remains transitional, with atomic wide
 registers to be replaced by composed flip-flops. See [roadmap](docs/roadmap.md)
@@ -40,6 +41,7 @@ bazel run //:transfer
 bazel run //:not_demo
 bazel run //:or_demo
 bazel run //:and_demo
+bazel run //:constant_bit_demo
 ```
 
 Run `bazel run //:format` to format C++ sources.

@@ -43,6 +43,13 @@ cc_binary(
 )
 
 cc_binary(
+    name = "constant_bit_demo",
+    srcs = ["examples/constant_bit.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
     name = "transfer",
     srcs = ["examples/transfer.cpp"],
     copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],

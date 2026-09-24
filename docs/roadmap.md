@@ -26,11 +26,13 @@ enumeration independence, transient snapshots, and retained values. The existing
 register baseline remains tested. These are the completed NOT requirements,
 not completion of group A.
 
-**NOT, AND, and OR are implemented and accepted:** see [NOT](not.md),
-[AND](and.md), and [OR](or.md). AND and OR each add two separately identified
-one-bit input ports and derived multi-input dependencies. Their four-row truth
-tables and containing circuits use the existing observation interface. Preserve
-these and register proofs. **Next: constant bit**, then DFF individually.
+**NOT, AND, OR, and constant bit are implemented and accepted:** see [NOT](not.md),
+[AND](and.md), [OR](or.md), and [constant bit](constant-bit.md). AND and OR each
+add two separately identified one-bit input ports and derived multi-input
+dependencies. Their four-row truth tables and containing circuits use the
+existing observation interface. The constant proves immutable zero/one source
+behavior and parent composition. Preserve these and register proofs. **Next:
+initialized DFF**.
 Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor
