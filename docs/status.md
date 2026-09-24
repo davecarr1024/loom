@@ -5,8 +5,9 @@ reproducible failures, and explanations as digital machines become more complex.
 The [design](design.md), [component contracts](component-contracts.md), and
 [roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
 [OR](or.md), [constant bit](constant-bit.md), [DFF](d-flip-flop.md),
-[gate-composed XOR](xor.md), and [one-bit mux](mux-bit.md) are implemented;
-fixed-width wire bundles are next.
+[gate-composed XOR](xor.md), [one-bit mux](mux-bit.md), and [fixed-width wire
+bundles](wire-bundles.md) are implemented. The next construction target is a
+word mux and small decoder.
 
 ## What runs today
 
@@ -34,6 +35,8 @@ truth tables; `bazel run //:constant_bit_demo` observes both constant values.
 `bazel run //:d_flip_flop_demo` prints a four-edge toggle trace with old Q, D,
 and new Q. `bazel run //:xor_demo` prints the XOR truth table from the derived
 NOT/AND/OR circuit; `bazel run //:mux_bit_demo` prints all selector/data rows.
+`bazel run //:wire_bundle_demo` routes four bits through an ordered bundle and
+prints the resulting bit sequence.
 
 The retained Phase 1 register-only baseline provides typed registers and
 role-specific width-safe connections, nested ownership discovery, compile-time
@@ -79,9 +82,9 @@ available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build fixed-width bundles of wires with explicit indexing, concatenation, and
-splitting semantics. Preserve all gate, constant, DFF, XOR, mux, and register
-proofs.
+Build a word mux and small decoder from accepted gates and the one-bit mux.
+Use accepted bundle wiring to express their fixed-width interfaces, and preserve
+all gate, constant, DFF, XOR, bit-mux, and register proofs.
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

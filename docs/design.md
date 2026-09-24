@@ -50,6 +50,10 @@ Port aliases, fixed bit ordering, bundling/unbundling, and fan-out are wiring
 operations. They carry identity and route bits; they do not execute arithmetic,
 selection, decoding, or mutable behavior. External input/output bindings and
 initial-state loading are simulation boundaries, not hidden machine components.
+Fixed-width bundles are non-owning views over existing scalar ports. Index 0 is
+the least-significant bit; concatenation takes the lower bundle first, and
+splitting preserves that order. A bundle connection expands to individual
+instance-specific scalar wires before finalization.
 
 Adding an atom requires a design decision naming its semantics, why composition
 is inadequate for the learning question, and the proof that keeps evaluation

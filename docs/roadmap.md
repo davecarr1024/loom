@@ -36,7 +36,10 @@ transient observation, edge-0 equivalence, repeated sampling, feedback,
 independent simulations, and simultaneous commit. XOR proves its truth table,
 gate inventory, schedule, and parent composition. Mux proves every selector/data
 row and parent composition. Preserve these and the transitional register proofs.
-**Next: fixed-width wire bundles**.
+**Fixed-width wire bundles are implemented and accepted:** see
+[their contract and evidence](wire-bundles.md). Bundle views preserve scalar
+endpoint identity; simulation finalizes each expanded wire through the existing
+plan. **Next: a word mux and small decoder.**
 Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor
@@ -63,8 +66,8 @@ Checkpoint: can the whole evaluation algorithm be explained using only this floo
 
 ## B. Selection and bit bundles
 
-XOR and a one-bit mux are accepted as gate-composed components. Next construct
-fixed-width bundles of wires, then a word mux and small decoder. Mux behavior
+XOR and a one-bit mux are accepted as gate-composed components. Fixed-width
+bundles of wires are accepted; next construct a word mux and small decoder. Mux behavior
 must be gate composition. Bit indexing,
 concatenation, splitting, and fan-out are explicit wiring with documented ordering.
 

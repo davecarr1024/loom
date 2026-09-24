@@ -5,6 +5,7 @@
 #include "loom/components/d_flip_flop.h"
 #include "loom/components/not.h"
 #include "loom/components/or.h"
+#include "loom/structure/wire_bundle.h"
 #include <algorithm>
 #include <cstdint>
 #include <expected>
@@ -149,7 +150,7 @@ struct Plan {
       }
       if (!valid)
         return valid;
-      std::apply([&](const auto &...wire) { (wires.push_back(wire), ...); },
+      std::apply([&](const auto &...wire) { (add_connection(wire), ...); },
                  node.connections());
     }
     // The default expected<void> success construction has no runtime operation.
@@ -250,6 +251,16 @@ struct Plan {
       --remaining;
     }
     return {};
+  }
+
+  void add_connection(const structure::Connection<1> &wire) {
+    wires.push_back(wire);
+  }
+
+  template <std::size_t Width>
+  void add_connection(const structure::BundleConnection<Width> &bundle) {
+    for (const auto &wire : bundle.bits)
+      add_connection(wire);
   }
 
   struct Evaluation {

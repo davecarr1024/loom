@@ -15,4 +15,5 @@ the expected child schedule, eight actual wires, both product terms, and parent
 composition. Run
 `bazel run //:xor_demo` for the truth table through the same observation path.
 The one-bit [mux](mux-bit.md) extends the same gates with selection semantics.
-Fixed-width wire bundles follow under the [roadmap](roadmap.md).
+Fixed-width wire bundles are accepted; see [their contract and evidence](wire-bundles.md)
+and the [roadmap](roadmap.md) for the next component.

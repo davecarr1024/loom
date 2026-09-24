@@ -27,6 +27,6 @@ simulations, rejected-input atomicity, feedback, and simultaneous register
 swaps. Run `bazel run //:d_flip_flop_demo` for a four-edge toggle trace through
 the same inventory, dependency plan, and simulation API.
 
-This accepts the initial atom floor. Gate-composed [XOR](xor.md) and [one-bit
-mux](mux-bit.md) start selection; fixed-width bundles follow under the
-[roadmap](roadmap.md).
+This accepts the initial atom floor. Gate-composed [XOR](xor.md), [one-bit
+mux](mux-bit.md), and [fixed-width wire bundles](wire-bundles.md) extend its
+selection vocabulary; the [roadmap](roadmap.md) tracks the next components.

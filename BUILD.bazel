@@ -16,7 +16,7 @@ filegroup(
 
 cc_test(
     name = "circuit_tests",
-    srcs = ["tests/circuit_test.cpp", "tests/not_test.cpp"],
+    srcs = ["tests/circuit_test.cpp", "tests/not_test.cpp", "tests/wire_bundle_test.cpp"],
     copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
     deps = [":loom", "@googletest//:gtest_main"],
 )
@@ -66,6 +66,13 @@ cc_binary(
 cc_binary(
     name = "mux_bit_demo",
     srcs = ["examples/mux_bit.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
+    name = "wire_bundle_demo",
+    srcs = ["examples/wire_bundle.cpp"],
     copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
     deps = [":loom"],
 )
@@ -131,6 +138,22 @@ py_test(
     srcs = ["scripts/compile_fail.py"],
     main = "scripts/compile_fail.py",
     args = ["custom_atom"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+py_test(
+    name = "bundle_width",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["bundle_width"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+py_test(
+    name = "bundle_role",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["bundle_role"],
     data = [":compile_fail_sources", ":loom_headers"],
 )
 

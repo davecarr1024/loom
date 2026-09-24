@@ -13,6 +13,8 @@ cases = {
     "logic_role": ("tests/compile_fail/logic_role.cpp", ("connect", "no matching function")),
     "numeric_bit": ("tests/compile_fail/numeric_bit.cpp", ("Bit", "constraints not satisfied")),
     "custom_atom": ("tests/compile_fail/custom_atom.cpp", ("CircuitRoot", "constraints not satisfied")),
+    "bundle_width": ("tests/compile_fail/bundle_width.cpp", ("connect", "no matching function")),
+    "bundle_role": ("tests/compile_fail/bundle_role.cpp", ("connect", "no matching function")),
 }
 source, required = cases[case]
 result = subprocess.run(

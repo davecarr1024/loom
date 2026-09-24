@@ -1,0 +1,16 @@
+services:
+  check:
+    build:
+      context: .
+      args:
+        BAZELISK_VERSION: "1.29.0"
+        LOOM_UID: "${LOOM_UID:-1000}"
+        LOOM_GID: "${LOOM_GID:-1000}"
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - bazel-cache:/home/loom/.cache/bazel
+    command: ./scripts/check.sh
+
+volumes:
+  bazel-cache:
