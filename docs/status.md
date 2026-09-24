@@ -4,29 +4,34 @@ Loom now asks whether upward component construction can preserve local reasoning
 reproducible failures, and explanations as digital machines become more complex.
 The [design](design.md), [component contracts](component-contracts.md), and
 [roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
-[OR](or.md), and [constant bit](constant-bit.md) are implemented; the
-initialized DFF is next.
+[OR](or.md), [constant bit](constant-bit.md), and [DFF](d-flip-flop.md) are
+implemented; the first selection components are next.
 
 ## What runs today
 
 The new `simulation::Definition` observes circuits of `components::Not`,
-`components::And`, `components::Or`, `components::ConstantBit`, and explicit
-external input/output boundaries. All logic executes through discovered
-gates and connections. The inventory, wire paths, schedule, and intermediate
-signal values explain the same execution. Observation works immediately after
-finalization, uses a complete call-scoped input snapshot, and owns its results.
-Invalid wiring, cycles, duplicate ownership, and invalid bindings are rejected.
+`components::And`, `components::Or`, `components::ConstantBit`, and
+`components::DFlipFlop`, plus explicit external input/output boundaries. A
+separate `simulation::Simulation` owns evolving state per instance. All logic
+executes through discovered components and connections. Inventory, wire paths,
+schedule, and intermediate signal values explain the same execution. Observation
+uses a complete call-scoped input snapshot; each shared edge samples all DFFs
+from one pre-edge evaluation and commits them simultaneously. Invalid wiring,
+cycles, duplicate ownership, and invalid bindings are rejected.
 
 `tests/not_test.cpp` proves NOT, AND, and OR truth tables, constant zero and one,
-source scheduling and parent composition, NOT/AND and NOT/OR
+source scheduling and parent composition, DFF initial values, sampling,
+repeated edges, feedback, simultaneous commits, independent simulations, retained
+evidence, and rejected-input atomicity. It also proves NOT/AND and NOT/OR
 composition, nested independent inputs, fan-out, child/wire order independence,
-evidence lifetime, empty snapshots,
-and malformed topology. Four new compile-fail cases prove port widths/roles,
-explicit Boolean values, and custom-atom rejection. `bazel run //:not_demo` prints
+empty snapshots, and malformed topology. Four compile-fail cases prove port
+widths/roles, explicit Boolean values, and custom-atom rejection.
+`bazel run //:not_demo` prints
 the inventory and both rows of the two-NOT truth table with intermediate values.
 `bazel run //:and_demo` and `bazel run //:or_demo` print the gates' exhaustive
 truth tables; `bazel run //:constant_bit_demo` observes both constant values.
-
+`bazel run //:d_flip_flop_demo` prints a four-edge toggle trace with old Q, D,
+and new Q.
 
 The retained Phase 1 register-only baseline provides typed registers and
 role-specific width-safe connections, nested ownership discovery, compile-time
@@ -57,25 +62,24 @@ contains no per-file or per-line exceptions.
 ## What is transitional or absent
 
 Atomic wide registers and path-based enable inputs remain baseline mechanisms.
-They are not the accepted long-term atom floor. The new model has NOT, AND, OR,
-and a constant bit; one-bit DFFs remain to be built, with registers and larger
-components executed through child circuits. Register-family concepts and typed
-control families are planned, not implemented.
+They are not the accepted long-term atom floor. The initial model has NOT, AND,
+OR, a constant bit, and a one-bit DFF, with registers and larger components
+executed through child circuits. Register-family concepts and typed control
+families are planned, not implemented.
 
 The unfinished old Phase 2 arithmetic/scheduler experiment was shelved because
 its unrestricted primitives and atomic full adder did not satisfy the revised
 construction premise. It had passed selected tests but not the complete gate.
-It is not part of the supported build. The new fixed-atom logic scheduler is
-implemented, but no DFF, ALU, memory, controller, or CPU exists. Port-level
-hierarchical observation is available; state/edge and instruction-level trace
-expansion remain future work. The stateless definition has no step operation.
+It is not part of the supported build. The fixed-atom logic scheduler and first
+stateful shared-edge simulation are implemented, but no ALU, memory, controller,
+or CPU exists. Port-level hierarchical observation and per-DFF edge evidence are
+available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build an initialized one-bit DFF. Prove initialization, sampling, repeated edges,
-independent simulations, and simultaneous commits while preserving all gate and
-constant-bit proofs. Stateful observation and edge equivalence belong to this
-acceptance gate.
+Build XOR and a one-bit mux through gate composition. Prove their truth tables,
+selection semantics, and parent composition while preserving all gate, constant,
+DFF, and register proofs.
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

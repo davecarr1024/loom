@@ -2,9 +2,10 @@
 
 This is the target execution specification for the construction plan. The
 [NOT harness](not.md) implements stateless combinational observation with explicit
-transient inputs. DFFs and combinational/stateful edge integration remain future
-work. The transitional [Phase 1](phase-1.md) API separately proves register-only
-snapshot/commit edges. See [status](status.md) for the current boundary.
+transient inputs. The initial [DFF](d-flip-flop.md) implementation exercises
+observation and shared-edge semantics in the same derived plan. The transitional
+[Phase 1](phase-1.md) API separately proves register-only snapshot/commit edges.
+See [status](status.md) for the current boundary.
 
 ## Storage defines the time boundary
 

@@ -26,19 +26,20 @@ enumeration independence, transient snapshots, and retained values. The existing
 register baseline remains tested. These are the completed NOT requirements,
 not completion of group A.
 
-**NOT, AND, OR, and constant bit are implemented and accepted:** see [NOT](not.md),
-[AND](and.md), [OR](or.md), and [constant bit](constant-bit.md). AND and OR each
-add two separately identified one-bit input ports and derived multi-input
-dependencies. Their four-row truth tables and containing circuits use the
-existing observation interface. The constant proves immutable zero/one source
-behavior and parent composition. Preserve these and register proofs. **Next:
-initialized DFF**.
+**NOT, AND, OR, constant bit, and initialized DFF are implemented and accepted:**
+see [NOT](not.md), [AND](and.md), [OR](or.md), [constant bit](constant-bit.md),
+and [DFF](d-flip-flop.md). The combinational atoms prove their truth tables and
+parent composition. The DFF proves initial state, transient observation,
+edge-0 equivalence, repeated sampling, feedback, independent simulations, and
+simultaneous commit. Preserve these and the transitional register proofs.
+**Next: gate-composed XOR and one-bit mux**.
 Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor
 
 Build NOT, AND, OR, constant bit, then one-bit D flip-flop, each with an explicit
-contract. NOT's harness grows into a CPU-independent runner usable at every
+contract. The first five atoms are accepted; selection components are next.
+NOT's harness grows into a CPU-independent runner usable at every
 level. External inputs are supplied by value per observation/edge; all machine
 state is declared storage. Admit only the [design allowlist](design.md).
 

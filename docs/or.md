@@ -20,5 +20,6 @@ truth table through the same definition and observation path.
 
 The existing multi-input dependency representation serves both AND and OR.
 Their local semantics remain explicit and separate in the exact atom dispatch.
-The next component is the immutable constant bit; the one-bit DFF follows it
-individually under [the roadmap](roadmap.md).
+The [constant bit](constant-bit.md) and [DFF](d-flip-flop.md) now complete the
+initial atom floor. Gate-composed selection begins next under
+[the roadmap](roadmap.md).

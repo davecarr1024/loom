@@ -1,8 +1,8 @@
 # NOT: the first accepted construction component
 
 NOT and its typed observation harness implement the first component in
-[roadmap group A](roadmap.md). AND and OR now extend the atom floor; constants
-and DFFs remain next work. This is not completion of the entire atomic floor.
+[roadmap group A](roadmap.md). AND, OR, constant bit, and DFF now extend the
+atom floor. This is not completion of the later construction groups.
 The register-only
 [Phase 1](phase-1.md) API remains a separate transitional baseline.
 
@@ -49,17 +49,19 @@ const auto inputs = std::array{
 const auto observation = definition->observe(inputs);
 ```
 
-There is no evolving simulation object or step operation until state atoms are
-introduced. The committed state is empty and every observation is before edge 0.
-All evaluation buffers belong to the call. Both truth-table inputs can be queried
-immediately after finalization, repeatedly, without retaining a current input.
-An empty circuit accepts an empty snapshot. Missing, duplicated, or foreign
-bindings return structured errors; an omitted binding cannot reuse an earlier
-value. Returned observations own every signal path and bit value.
+For a stateless circuit, the definition's pure observation is the complete
+runtime API. Every observation is before edge 0 and the committed state is
+empty. Stateful circuits use independent `simulation::Simulation` objects to
+own evolving state. All evaluation buffers belong to the call. Both truth-table
+inputs can be queried immediately after finalization, repeatedly, without
+retaining a current input. An empty circuit accepts an empty snapshot. Missing,
+duplicated, or foreign bindings return structured errors; an omitted binding
+cannot reuse an earlier value. Returned observations own every signal path and
+bit value.
 
 This implements the stateless part of [timing](timing.md)'s transient-observation
-contract. Observation-versus-edge-0 equivalence and post-commit state tests remain
-requirements for the DFF component, not claims about this component.
+contract. The [DFF](d-flip-flop.md) extends it with independent evolving state,
+edge-0 equivalence, and post-commit observations.
 
 ## Derived structure and execution
 
@@ -144,8 +146,6 @@ source/sink despite all carrying one bit. There is no generic behavior interface
 to bypass the atom floor. Richer capability/refinement families remain for the
 concrete consumers in the roadmap.
 
-The next component after NOT was AND, followed by OR, through the same definition
-and observation boundary. Each extends the fixed atom semantics and multi-input
-dependency representation with a truth table and a containing circuit; neither
-introduces a generic callback registry or prematurely implements the remaining
-floor. See [AND](and.md) and [OR](or.md).
+AND and OR extended the fixed atom semantics through the same observation
+boundary; the constant bit added a source value. The [DFF](d-flip-flop.md) now
+adds state owned by an independent simulation and sampled on shared edges.

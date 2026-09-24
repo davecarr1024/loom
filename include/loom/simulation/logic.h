@@ -2,9 +2,11 @@
 
 #include "loom/components/and.h"
 #include "loom/components/constant_bit.h"
+#include "loom/components/d_flip_flop.h"
 #include "loom/components/not.h"
 #include "loom/components/or.h"
 #include <algorithm>
+#include <cstdint>
 #include <expected>
 #include <memory>
 #include <optional>
@@ -26,7 +28,8 @@ enum class Kind {
   not_gate,
   and_gate,
   or_gate,
-  constant_bit
+  constant_bit,
+  d_flip_flop
 };
 struct ComponentInfo {
   std::string path;
@@ -64,6 +67,7 @@ concept Atom =
     std::same_as<T, components::Not> || std::same_as<T, components::And> ||
     std::same_as<T, components::Or> ||
     std::same_as<T, components::ConstantBit> ||
+    std::same_as<T, components::DFlipFlop> ||
     std::same_as<T, structure::ExternalInput> ||
     std::same_as<T, structure::ExternalOutput>;
 struct Node {
@@ -72,6 +76,7 @@ struct Node {
   std::vector<std::pair<const structure::Input<1> *, std::string>> inputs;
   const structure::Output<1> *output = nullptr;
   std::optional<bool> constant;
+  std::optional<bool> initial;
 };
 // One derived representation drives validation, execution, and evidence. No
 // callable registry exists: only exact allowlisted types supply atom behavior.
@@ -96,35 +101,40 @@ struct Plan {
     if (std::ranges::find(nodes, &node, &Node::identity) != nodes.end())
       return std::unexpected(Error{"duplicate_component", path});
     if constexpr (std::same_as<T, components::Not>) {
-      Node discovered{&node, {path, Kind::not_gate}, {}, &node.output(), {}};
+      Node discovered{&node, {path, Kind::not_gate}, {}, &node.output(), {},
+                      {}};
       discovered.inputs.emplace_back(&node.input(), "in");
       nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, components::And>) {
-      Node discovered{&node, {path, Kind::and_gate}, {}, &node.output(), {}};
+      Node discovered{&node, {path, Kind::and_gate}, {}, &node.output(), {},
+                      {}};
       discovered.inputs.emplace_back(&node.left(), "left");
       discovered.inputs.emplace_back(&node.right(), "right");
       nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, components::Or>) {
-      Node discovered{&node, {path, Kind::or_gate}, {}, &node.output(), {}};
+      Node discovered{&node, {path, Kind::or_gate}, {}, &node.output(), {}, {}};
       discovered.inputs.emplace_back(&node.left(), "left");
       discovered.inputs.emplace_back(&node.right(), "right");
       nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, components::ConstantBit>) {
-      Node discovered{&node,
-                      {path, Kind::constant_bit},
-                      {},
-                      &node.output(),
-                      node.fixed_value.high()};
+      Node discovered{&node,          {path, Kind::constant_bit}, {},
+                      &node.output(), node.fixed_value.high(),    {}};
+      nodes.push_back(std::move(discovered));
+    } else if constexpr (std::same_as<T, components::DFlipFlop>) {
+      Node discovered{&node, {path, Kind::d_flip_flop}, {}, &node.output(),
+                      {},    node.initial_value.high()};
+      discovered.inputs.emplace_back(&node.data(), "data");
       nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, structure::ExternalInput>) {
       nodes.push_back(
-          {&node, {path, Kind::external_input}, {}, &node.output(), {}});
+          {&node, {path, Kind::external_input}, {}, &node.output(), {}, {}});
     } else if constexpr (std::same_as<T, structure::ExternalOutput>) {
-      Node discovered{&node, {path, Kind::external_output}, {}, nullptr, {}};
+      Node discovered{&node, {path, Kind::external_output}, {}, nullptr, {},
+                      {}};
       discovered.inputs.emplace_back(&node.input(), "in");
       nodes.push_back(std::move(discovered));
     } else {
-      nodes.push_back({&node, {path, Kind::composite}, {}, nullptr, {}});
+      nodes.push_back({&node, {path, Kind::composite}, {}, nullptr, {}, {}});
       std::expected<void, Error> valid;
       if constexpr (std::tuple_size_v<decltype(node.children())> != 0) {
         std::apply(
@@ -199,7 +209,10 @@ struct Plan {
                 Error{"missing_driver",
                       nodes[i].info.path + "." + nodes[i].inputs[port].second});
         }
-        ++remaining;
+        if (nodes[i].info.kind == Kind::d_flip_flop)
+          ready[i] = true;
+        else
+          ++remaining;
       } else
         ready[i] = true;
     }
@@ -239,12 +252,28 @@ struct Plan {
     return {};
   }
 
-  std::expected<Observation, Error>
-  observe(std::span<const structure::Binding> inputs) const {
+  struct Evaluation {
+    std::vector<bool> values;
+    Observation observation;
+  };
+
+  std::vector<bool> initial_state() const {
+    std::vector<bool> state(nodes.size(), false);
+    for (std::size_t i = 0; i < nodes.size(); ++i)
+      if (nodes[i].info.kind == Kind::d_flip_flop)
+        state[i] = *nodes[i].initial;
+    return state;
+  }
+
+  std::expected<Evaluation, Error>
+  evaluate(std::span<const structure::Binding> inputs,
+           const std::vector<bool> &state) const {
     std::vector<bool> values(nodes.size(), false), bound(nodes.size(), false);
     for (std::size_t i = 0; i < nodes.size(); ++i)
       if (nodes[i].constant)
         values[i] = *nodes[i].constant;
+      else if (nodes[i].info.kind == Kind::d_flip_flop)
+        values[i] = state[i];
     for (const auto &binding : inputs) {
       const auto found =
           std::ranges::find(nodes, binding.port(), &Node::output);
@@ -278,7 +307,15 @@ struct Plan {
         result.signals.push_back(
             {nodes[i].info.path + ".out", value::Bit{bool(values[i])}});
     }
-    return result;
+    return Evaluation{std::move(values), std::move(result)};
+  }
+
+  std::expected<Observation, Error>
+  observe(std::span<const structure::Binding> inputs) const {
+    auto result = evaluate(inputs, initial_state());
+    if (!result)
+      return std::unexpected(result.error());
+    return std::move(result->observation);
   }
 };
 } // namespace detail
@@ -309,8 +346,8 @@ public:
   const auto &inventory() const { return plan_.inventory; }
   const auto &connections() const { return plan_.connections; }
   const auto &schedule() const { return plan_.schedule; }
-  // With no state atoms admitted yet, all runs are pure observations at edge
-  // zero. Each call owns its input/evaluation buffers and returned evidence.
+  // This definition-level view uses declared initial state. Evolving state
+  // belongs to independent Simulation instances created from this definition.
   std::expected<Observation, Error>
   observe(std::span<const structure::Binding> inputs) const {
     return plan_.observe(inputs);
@@ -321,5 +358,78 @@ private:
   explicit Definition(Args &&...args) : root_(std::forward<Args>(args)...) {}
   const Root root_;
   detail::Plan plan_;
+  template <CircuitRoot> friend class Simulation;
+};
+
+struct Commit {
+  std::string path;
+  value::Bit old_value;
+  value::Bit data_value;
+  value::Bit new_value;
+  bool operator==(const Commit &) const = default;
+};
+struct Edge {
+  std::uint64_t index;
+  Observation evaluated;
+  std::vector<Commit> commits;
+  bool operator==(const Edge &) const = default;
+};
+
+template <CircuitRoot Root> class Simulation {
+public:
+  Simulation(const Simulation &) = delete;
+  Simulation &operator=(const Simulation &) = delete;
+  Simulation(Simulation &&) = delete;
+  Simulation &operator=(Simulation &&) = delete;
+
+  static std::expected<std::shared_ptr<Simulation>, Error>
+  create(std::shared_ptr<const Definition<Root>> definition) {
+    if (!definition)
+      return std::unexpected(Error{"null_definition", ""});
+    auto initial = definition->plan_.initial_state();
+    return std::shared_ptr<Simulation>(
+        new Simulation(std::move(definition), std::move(initial)));
+  }
+
+  std::uint64_t edge_index() const { return edge_index_; }
+  std::expected<Observation, Error>
+  observe(std::span<const structure::Binding> inputs) const {
+    auto result = definition_->plan_.evaluate(inputs, state_);
+    if (!result)
+      return std::unexpected(result.error());
+    return std::move(result->observation);
+  }
+
+  std::expected<Edge, Error> step(std::span<const structure::Binding> inputs) {
+    auto evaluation = definition_->plan_.evaluate(inputs, state_);
+    if (!evaluation)
+      return std::unexpected(evaluation.error());
+    auto next = state_;
+    std::vector<Commit> commits;
+    for (std::size_t i = 0; i < definition_->plan_.nodes.size(); ++i) {
+      const auto &node = definition_->plan_.nodes[i];
+      if (node.info.kind != Kind::d_flip_flop)
+        continue;
+      const bool data = evaluation->values[definition_->plan_.drivers[i][0]];
+      next[i] = data;
+      const bool old = state_[i];
+      const bool committed = next[i];
+      commits.push_back({node.info.path, value::Bit{old}, value::Bit{data},
+                         value::Bit{committed}});
+    }
+    Edge result{edge_index_, std::move(evaluation->observation),
+                std::move(commits)};
+    state_ = std::move(next);
+    ++edge_index_;
+    return result;
+  }
+
+private:
+  Simulation(std::shared_ptr<const Definition<Root>> definition,
+             std::vector<bool> state)
+      : definition_(std::move(definition)), state_(std::move(state)) {}
+  std::shared_ptr<const Definition<Root>> definition_;
+  std::vector<bool> state_;
+  std::uint64_t edge_index_ = 0;
 };
 } // namespace loom::simulation

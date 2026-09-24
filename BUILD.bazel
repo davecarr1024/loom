@@ -50,6 +50,13 @@ cc_binary(
 )
 
 cc_binary(
+    name = "d_flip_flop_demo",
+    srcs = ["examples/d_flip_flop.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
     name = "transfer",
     srcs = ["examples/transfer.cpp"],
     copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],

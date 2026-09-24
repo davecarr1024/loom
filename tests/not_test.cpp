@@ -5,11 +5,13 @@
 namespace {
 using loom::components::And;
 using loom::components::ConstantBit;
+using loom::components::DFlipFlop;
 using loom::components::Not;
 using loom::components::Or;
 using loom::simulation::Definition;
 using loom::simulation::Error;
 using loom::simulation::Kind;
+using loom::simulation::Simulation;
 using loom::structure::connect;
 using loom::structure::ExternalInput;
 using loom::structure::ExternalOutput;
@@ -467,6 +469,179 @@ TEST(ConstantBit, ComposesWithInputAndGateInParent) {
   }
 }
 
+struct LoadDff {
+  const std::string name = "load";
+  ExternalInput input{"input"};
+  DFlipFlop state{"state", Bit{false}};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(input, state, output); }
+  auto connections() const {
+    return std::tuple{connect(input.output(), state.data()),
+                      connect(state.output(), output.input())};
+  }
+};
+
+TEST(DFlipFlop, SamplingObservationsAndIndependentSimulations) {
+  const auto definition = Definition<LoadDff>::create();
+  ASSERT_TRUE(definition);
+  EXPECT_EQ((*definition)->schedule(),
+            (std::vector<std::string>{"load.output"}));
+  const auto first = Simulation<LoadDff>::create(*definition);
+  const auto second = Simulation<LoadDff>::create(*definition);
+  ASSERT_TRUE(first);
+  ASSERT_TRUE(second);
+  EXPECT_EQ((*first)->observe({}).error(),
+            (Error{"missing_input", "load.input"}));
+  EXPECT_EQ((*first)->edge_index(), 0U);
+  const auto find_value = [](const loom::simulation::Observation &observation,
+                             const std::string &path) {
+    const auto found = std::ranges::find(observation.signals, path,
+                                         &loom::simulation::Signal::path);
+    EXPECT_NE(found, observation.signals.end());
+    return found == observation.signals.end() ? false : found->value.high();
+  };
+  const std::array high{(*definition)->root().input.bind(Bit{true})};
+  const std::array low{(*definition)->root().input.bind(Bit{false})};
+  const auto retained = (*first)->observe(high);
+  ASSERT_TRUE(retained);
+  EXPECT_FALSE(find_value(*retained, "load.state.out"));
+  EXPECT_TRUE(find_value(*retained, "load.state.data"));
+  const auto after_observation = (*first)->step(low);
+  const auto without_observation = (*second)->step(low);
+  ASSERT_TRUE(after_observation);
+  ASSERT_TRUE(without_observation);
+  EXPECT_EQ(*after_observation, *without_observation);
+  EXPECT_EQ(after_observation->index, 0U);
+  ASSERT_EQ(after_observation->commits.size(), 1U);
+  EXPECT_EQ(after_observation->commits[0],
+            (loom::simulation::Commit{"load.state", Bit{false}, Bit{false},
+                                      Bit{false}}));
+  EXPECT_TRUE(find_value(*retained, "load.state.data"));
+  EXPECT_FALSE(find_value(*retained, "load.state.out"));
+  EXPECT_EQ((*first)->edge_index(), 1U);
+  EXPECT_EQ((*second)->edge_index(), 1U);
+  const auto second_edge = (*first)->step(high);
+  ASSERT_TRUE(second_edge);
+  EXPECT_EQ(second_edge->index, 1U);
+  EXPECT_EQ(second_edge->commits[0],
+            (loom::simulation::Commit{"load.state", Bit{false}, Bit{true},
+                                      Bit{true}}));
+  const auto after = (*first)->observe(low);
+  ASSERT_TRUE(after);
+  EXPECT_TRUE(find_value(*after, "load.state.out"));
+  EXPECT_FALSE(find_value(*after, "load.state.data"));
+  EXPECT_EQ((*first)->step({}).error(), (Error{"missing_input", "load.input"}));
+  EXPECT_EQ((*first)->edge_index(), 2U);
+  EXPECT_TRUE(find_value(*(*first)->observe(low), "load.state.out"));
+  EXPECT_FALSE(find_value(*(*second)->observe(low), "load.state.out"));
+}
+
+TEST(DFlipFlop, RejectsNullDefinitionWhenCreatingSimulation) {
+  EXPECT_EQ(Simulation<LoadDff>::create({}).error(),
+            (Error{"null_definition", ""}));
+}
+
+struct InitialDff {
+  const std::string name = "initial";
+  ExternalInput input{"input"};
+  DFlipFlop state;
+  explicit InitialDff(bool initial) : state("state", Bit{initial}) {}
+  auto children() const { return std::tie(input, state); }
+  auto connections() const {
+    return std::tuple{connect(input.output(), state.data())};
+  }
+};
+
+TEST(DFlipFlop, BothInitialValuesAreObservableBeforeEdgeZero) {
+  for (const bool initial : {false, true}) {
+    const auto definition = Definition<InitialDff>::create(initial);
+    ASSERT_TRUE(definition);
+    EXPECT_NE(std::ranges::find((*definition)->inventory(),
+                                loom::simulation::ComponentInfo{
+                                    "initial.state", Kind::d_flip_flop}),
+              (*definition)->inventory().end());
+    const auto simulation = Simulation<InitialDff>::create(*definition);
+    ASSERT_TRUE(simulation);
+    const std::array binding{(*definition)->root().input.bind(Bit{!initial})};
+    const auto definition_observation = (*definition)->observe(binding);
+    ASSERT_TRUE(definition_observation);
+    const auto observation = (*simulation)->observe(binding);
+    ASSERT_TRUE(observation);
+    const auto state =
+        std::ranges::find(observation->signals, "initial.state.out",
+                          &loom::simulation::Signal::path);
+    ASSERT_NE(state, observation->signals.end());
+    EXPECT_EQ(state->value.high(), initial);
+    const auto definition_state =
+        std::ranges::find(definition_observation->signals, "initial.state.out",
+                          &loom::simulation::Signal::path);
+    ASSERT_NE(definition_state, definition_observation->signals.end());
+    EXPECT_EQ(definition_state->value.high(), initial);
+    EXPECT_EQ((*simulation)->edge_index(), 0U);
+  }
+}
+
+struct SwapDffs {
+  const std::string name = "swap";
+  DFlipFlop a{"a", Bit{false}}, b{"b", Bit{true}};
+  auto children() const { return std::tie(a, b); }
+  auto connections() const {
+    return std::tuple{connect(a.output(), b.data()),
+                      connect(b.output(), a.data())};
+  }
+};
+
+TEST(DFlipFlop, FeedbackBreaksCyclesAndCommitsSimultaneously) {
+  const auto definition = Definition<SwapDffs>::create();
+  ASSERT_TRUE(definition);
+  EXPECT_TRUE((*definition)->schedule().empty());
+  const auto simulation = Simulation<SwapDffs>::create(*definition);
+  ASSERT_TRUE(simulation);
+  const auto edge = (*simulation)->step({});
+  ASSERT_TRUE(edge);
+  EXPECT_EQ(edge->commits, (std::vector<loom::simulation::Commit>{
+                               {"swap.a", Bit{false}, Bit{true}, Bit{true}},
+                               {"swap.b", Bit{true}, Bit{false}, Bit{false}}}));
+  const auto after = (*simulation)->observe({});
+  ASSERT_TRUE(after);
+  const auto a = std::ranges::find(after->signals, "swap.a.out",
+                                   &loom::simulation::Signal::path);
+  const auto b = std::ranges::find(after->signals, "swap.b.out",
+                                   &loom::simulation::Signal::path);
+  ASSERT_NE(a, after->signals.end());
+  ASSERT_NE(b, after->signals.end());
+  EXPECT_TRUE(a->value.high());
+  EXPECT_FALSE(b->value.high());
+}
+
+struct ToggleDff {
+  const std::string name = "toggle";
+  DFlipFlop state{"state", Bit{false}};
+  Not invert{"invert"};
+  auto children() const { return std::tie(state, invert); }
+  auto connections() const {
+    return std::tuple{connect(state.output(), invert.input()),
+                      connect(invert.output(), state.data())};
+  }
+};
+
+TEST(DFlipFlop, SamplesComposedNextValueAcrossRepeatedEdges) {
+  const auto definition = Definition<ToggleDff>::create();
+  ASSERT_TRUE(definition);
+  EXPECT_EQ((*definition)->schedule(),
+            (std::vector<std::string>{"toggle.invert"}));
+  const auto simulation = Simulation<ToggleDff>::create(*definition);
+  ASSERT_TRUE(simulation);
+  for (std::uint64_t edge_index = 0; edge_index < 4; ++edge_index) {
+    const auto edge = (*simulation)->step({});
+    ASSERT_TRUE(edge);
+    EXPECT_EQ(edge->index, edge_index);
+    EXPECT_EQ(edge->commits[0].old_value.high(), edge_index % 2 == 1);
+    EXPECT_EQ(edge->commits[0].data_value.high(), edge_index % 2 == 0);
+    EXPECT_EQ(edge->commits[0].new_value, edge->commits[0].data_value);
+  }
+}
+
 struct LiteralName {
   const char *name = "literal";
   auto children() const { return std::tuple{}; }
@@ -478,6 +653,8 @@ static_assert(!std::is_copy_constructible_v<Not>);
 static_assert(!std::is_copy_constructible_v<And>);
 static_assert(!std::is_copy_constructible_v<Or>);
 static_assert(!std::is_copy_constructible_v<ConstantBit>);
+static_assert(!std::is_copy_constructible_v<DFlipFlop>);
+static_assert(!std::is_copy_constructible_v<Simulation<LoadDff>>);
 static_assert(!loom::simulation::CircuitRoot<Inverter &>);
 static_assert(!loom::simulation::CircuitRoot<Inverter *>);
 static_assert(!loom::simulation::CircuitRoot<And &>);
