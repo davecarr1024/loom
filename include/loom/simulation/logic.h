@@ -130,8 +130,9 @@ struct Plan {
       std::apply([&](const auto &...wire) { (wires.push_back(wire), ...); },
                  node.connections());
     }
-    const std::expected<void, Error> success{};
-    return success;
+    // The default expected<void> success construction has no runtime operation.
+    using Ok = std::expected<void, Error>; // LCOV_EXCL_LINE
+    return Ok{};
   }
 
   std::expected<void, Error> finalize() {

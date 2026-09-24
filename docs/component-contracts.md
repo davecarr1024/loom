@@ -95,6 +95,9 @@ framework or proof assistant built in advance.
 Do not require a CPU to test a leaf. Do not call a declared latency a proof.
 Coverage remains 100% measured production lines/functions with narrowly
 justified exceptions only; meaningful behavioral tests are a separate obligation.
+Use `LCOV_EXCL_LINE` only for source expressions Clang cannot instrument, with
+the reason in the source comment; the coverage checker handles that marker
+generically and contains no file-specific exceptions.
    Check type guarantees with negative compilation cases that fail for the intended
 reason. Prefer independent Boolean/arithmetic oracles to expected values copied
 from the circuit's implementation.

@@ -66,21 +66,35 @@ template <class T>
 concept OwnedRoot = std::is_object_v<T> && !std::is_const_v<T> &&
                     (RegisterComponent<T> || CompositeComponent<T>);
 
+template <class T> struct CircuitFacts;
+
+namespace structure_detail {
+template <class T, class Indices> struct ChildRegisterCount;
+template <class T, std::size_t... I>
+struct ChildRegisterCount<T, std::index_sequence<I...>>
+    : std::integral_constant<
+          std::size_t,
+          (std::size_t{0} + ... +
+           CircuitFacts<std::remove_cvref_t<std::tuple_element_t<
+               I, decltype(std::declval<const T &>().children())>>>::
+               registers)> {};
+
+template <class T, bool IsRegister = RegisterComponent<T>> struct RegisterCount;
+template <class T>
+struct RegisterCount<T, true> : std::integral_constant<std::size_t, 1> {};
+template <class T>
+struct RegisterCount<T, false>
+    : ChildRegisterCount<T,
+                         std::make_index_sequence<std::tuple_size_v<
+                             decltype(std::declval<const T &>().children())>>> {
+};
+} // namespace structure_detail
+
 // Counts add across actual owned child types, independently of connections.
 template <class T> struct CircuitFacts {
   static_assert(RegisterComponent<T> || CompositeComponent<T>);
-  static constexpr std::size_t registers = [] {
-    if constexpr (RegisterComponent<T>) {
-      return std::size_t{1};
-    } else {
-      using Children = decltype(std::declval<const T &>().children());
-      return []<std::size_t... I>(std::index_sequence<I...>) {
-        return (std::size_t{0} + ... +
-                CircuitFacts<std::remove_cvref_t<
-                    std::tuple_element_t<I, Children>>>::registers);
-      }(std::make_index_sequence<std::tuple_size_v<Children>>{});
-    }
-  }();
+  static constexpr std::size_t registers =
+      structure_detail::RegisterCount<T>::value;
   static constexpr std::size_t data_inputs = registers;
   static constexpr std::size_t data_outputs = registers;
 };

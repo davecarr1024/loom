@@ -46,13 +46,11 @@ edge 0 transfer.source: 42 -> 42
 
 `./scripts/check.sh` is the shared Bazel/Clang 19 local/CI gate. It checks docs,
 behavioral and negative compilation tests, formatting, compatible static
-analysis, and 100% measured production line/function coverage. The coverage
-gate excludes only the five `CircuitFacts::registers` constexpr fold-expression
-lines, whose behavior is proved by compile-time assertions, and the empty
-success-value construction at the end of discovery, which LLVM LCOV does not
-instrument as a line.
-The checker asserts those exact locations and function records so other
-uncovered production code still fails the gate.
+analysis, and 100% measured production line/function coverage. Structural
+register facts use type-level constant expressions and are verified by
+compile-time assertions. For any other non-executable expression LLVM reports
+as a line, the checker honors generic `LCOV_EXCL_LINE` source annotations; it
+contains no per-file or per-line exceptions.
 
 ## What is transitional or absent
 
