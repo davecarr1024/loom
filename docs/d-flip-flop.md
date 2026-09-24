@@ -27,5 +27,5 @@ simulations, rejected-input atomicity, feedback, and simultaneous register
 swaps. Run `bazel run //:d_flip_flop_demo` for a four-edge toggle trace through
 the same inventory, dependency plan, and simulation API.
 
-This accepts the initial atom floor. The next construction group begins with
-gate-composed XOR and a one-bit mux; see the [roadmap](roadmap.md).
+This accepts the initial atom floor. Gate-composed [XOR](xor.md) begins the
+selection group; the one-bit mux follows under the [roadmap](roadmap.md).

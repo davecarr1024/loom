@@ -1,3 +1,4 @@
+#include "loom/components/xor.h"
 #include "loom/simulation/logic.h"
 #include <array>
 #include <gtest/gtest.h>
@@ -8,6 +9,7 @@ using loom::components::ConstantBit;
 using loom::components::DFlipFlop;
 using loom::components::Not;
 using loom::components::Or;
+using loom::components::Xor;
 using loom::simulation::Definition;
 using loom::simulation::Error;
 using loom::simulation::Kind;
@@ -469,6 +471,72 @@ TEST(ConstantBit, ComposesWithInputAndGateInParent) {
   }
 }
 
+TEST(Xor, TruthTableAndDerivedGateComposition) {
+  const auto definition = Definition<Xor>::create("xor");
+  ASSERT_TRUE(definition);
+  EXPECT_EQ((*definition)->inventory(),
+            (std::vector<loom::simulation::ComponentInfo>{
+                {"xor", Kind::composite},
+                {"xor.invert_left", Kind::not_gate},
+                {"xor.invert_right", Kind::not_gate},
+                {"xor.left", Kind::external_input},
+                {"xor.left_only", Kind::and_gate},
+                {"xor.result", Kind::or_gate},
+                {"xor.right", Kind::external_input},
+                {"xor.right_only", Kind::and_gate}}));
+  EXPECT_EQ((*definition)->schedule(),
+            (std::vector<std::string>{"xor.invert_left", "xor.invert_right",
+                                      "xor.left_only", "xor.right_only",
+                                      "xor.result"}));
+  EXPECT_EQ((*definition)->connections().size(), 8U);
+  for (const bool left : {false, true})
+    for (const bool right : {false, true}) {
+      const std::array inputs{(*definition)->root().left().bind(Bit{left}),
+                              (*definition)->root().right().bind(Bit{right})};
+      const auto observed = (*definition)->observe(inputs);
+      ASSERT_TRUE(observed);
+      const auto find = [&](const std::string &path) {
+        const auto signal = std::ranges::find(observed->signals, path,
+                                              &loom::simulation::Signal::path);
+        EXPECT_NE(signal, observed->signals.end());
+        return signal == observed->signals.end() ? false : signal->value.high();
+      };
+      EXPECT_EQ(find("xor.left_only.out"), left && !right);
+      EXPECT_EQ(find("xor.right_only.out"), !left && right);
+      EXPECT_EQ(find("xor.result.out"), left != right);
+    }
+}
+
+struct XnorParent {
+  const std::string name = "xnor_parent";
+  Xor xor_gate{"xor"};
+  Not invert{"invert"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(xor_gate, invert, output); }
+  auto connections() const {
+    return std::tuple{connect(xor_gate.output(), invert.input()),
+                      connect(invert.output(), output.input())};
+  }
+};
+
+TEST(Xor, ComposesWithNotAsTheSameObservedCircuit) {
+  const auto definition = Definition<XnorParent>::create();
+  ASSERT_TRUE(definition);
+  for (const bool left : {false, true})
+    for (const bool right : {false, true}) {
+      const std::array inputs{
+          (*definition)->root().xor_gate.left().bind(Bit{left}),
+          (*definition)->root().xor_gate.right().bind(Bit{right})};
+      const auto observed = (*definition)->observe(inputs);
+      ASSERT_TRUE(observed);
+      const auto output =
+          std::ranges::find(observed->signals, "xnor_parent.output.in",
+                            &loom::simulation::Signal::path);
+      ASSERT_NE(output, observed->signals.end());
+      EXPECT_EQ(output->value.high(), left == right);
+    }
+}
+
 struct LoadDff {
   const std::string name = "load";
   ExternalInput input{"input"};
@@ -653,6 +721,7 @@ static_assert(!std::is_copy_constructible_v<Not>);
 static_assert(!std::is_copy_constructible_v<And>);
 static_assert(!std::is_copy_constructible_v<Or>);
 static_assert(!std::is_copy_constructible_v<ConstantBit>);
+static_assert(!std::is_copy_constructible_v<Xor>);
 static_assert(!std::is_copy_constructible_v<DFlipFlop>);
 static_assert(!std::is_copy_constructible_v<Simulation<LoadDff>>);
 static_assert(!loom::simulation::CircuitRoot<Inverter &>);

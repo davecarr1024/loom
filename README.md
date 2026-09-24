@@ -16,12 +16,12 @@ choices visible. Tests harden each component and its containing assemblies.
 
 ## Status
 
-[NOT, AND, OR, constant bit, DFF, and the typed observation harness](docs/not.md)
-are implemented. Single NOT, AND, OR, and constant bit atoms, plus their
-composed circuits, execute from owned components and connections. Stateful
-circuits use independent simulation state with pure observations and atomic
-shared edges. The next group begins with gate-composed selection; the initial
-atomic floor is complete. See [DFF](docs/d-flip-flop.md).
+[The initial atom floor](docs/design.md) and
+[gate-composed XOR](docs/xor.md) are implemented. Circuits execute from owned
+components and connections; stateful circuits use independent simulation state
+with pure observations and
+atomic shared edges. The initial atom floor is complete. The one-bit mux is
+next; see [DFF](docs/d-flip-flop.md) and [XOR](docs/xor.md).
 
 The tested register-only Phase 1 baseline remains transitional, with atomic wide
 registers to be replaced by composed flip-flops. See [roadmap](docs/roadmap.md)
@@ -43,6 +43,7 @@ bazel run //:or_demo
 bazel run //:and_demo
 bazel run //:constant_bit_demo
 bazel run //:d_flip_flop_demo
+bazel run //:xor_demo
 ```
 
 Run `bazel run //:format` to format C++ sources.

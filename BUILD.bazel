@@ -57,6 +57,13 @@ cc_binary(
 )
 
 cc_binary(
+    name = "xor_demo",
+    srcs = ["examples/xor.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
     name = "transfer",
     srcs = ["examples/transfer.cpp"],
     copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],

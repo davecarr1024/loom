@@ -4,8 +4,8 @@ Loom now asks whether upward component construction can preserve local reasoning
 reproducible failures, and explanations as digital machines become more complex.
 The [design](design.md), [component contracts](component-contracts.md), and
 [roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
-[OR](or.md), [constant bit](constant-bit.md), and [DFF](d-flip-flop.md) are
-implemented; the first selection components are next.
+[OR](or.md), [constant bit](constant-bit.md), [DFF](d-flip-flop.md), and
+[gate-composed XOR](xor.md) are implemented; a one-bit mux is next.
 
 ## What runs today
 
@@ -31,7 +31,8 @@ the inventory and both rows of the two-NOT truth table with intermediate values.
 `bazel run //:and_demo` and `bazel run //:or_demo` print the gates' exhaustive
 truth tables; `bazel run //:constant_bit_demo` observes both constant values.
 `bazel run //:d_flip_flop_demo` prints a four-edge toggle trace with old Q, D,
-and new Q.
+and new Q. `bazel run //:xor_demo` prints the XOR truth table from the derived
+NOT/AND/OR circuit.
 
 The retained Phase 1 register-only baseline provides typed registers and
 role-specific width-safe connections, nested ownership discovery, compile-time
@@ -77,9 +78,9 @@ available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build XOR and a one-bit mux through gate composition. Prove their truth tables,
-selection semantics, and parent composition while preserving all gate, constant,
-DFF, and register proofs.
+Build a one-bit mux through gate composition. Prove its selection truth table,
+interface semantics, and parent composition while preserving the accepted gate,
+constant, DFF, XOR, and register proofs.
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

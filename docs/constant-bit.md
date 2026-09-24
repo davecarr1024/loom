@@ -14,5 +14,6 @@ Run `bazel run //:constant_bit_demo` to observe both fixed values.
 
 The immutable value belongs to the definition, while each observation still
 owns its output evidence. The [initialized one-bit DFF](d-flip-flop.md) extends
-the same plan with simulation-owned state and shared-edge commits. Gate-composed
-selection is next; see the [roadmap](roadmap.md).
+the same plan with simulation-owned state and shared-edge commits.
+[Gate-composed XOR](xor.md) starts the selection components; see the
+[roadmap](roadmap.md).
