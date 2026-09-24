@@ -47,9 +47,11 @@ edge result. It does not compute or commit a state transition, advance the
 edge index, consume a protocol transaction, or install inputs for a later call.
 
 Each observation and step supplies a complete input snapshot for the assembly's
-external input ports. The simulator has no implicit mutable "current input"
-register and never fills missing inputs from a previous call. Invalid bindings
-or input values return structured diagnostics without changing state or time.
+unconnected external input ports. A nested external input with an inbound parent
+wire takes its value from that wire and cannot also receive a binding. The
+simulator has no implicit mutable "current input" register and never fills
+missing inputs from a previous call. Invalid bindings or input values return
+structured diagnostics without changing state or time.
 A closed circuit with no external inputs uses an empty snapshot.
 
 `step(I[n])` independently evaluates C[n] = `Eval(S[n], I[n])`, validates the

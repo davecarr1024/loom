@@ -127,8 +127,10 @@ struct Plan {
       discovered.inputs.emplace_back(&node.data(), "data");
       nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, structure::ExternalInput>) {
-      nodes.push_back(
-          {&node, {path, Kind::external_input}, {}, &node.output(), {}, {}});
+      Node discovered{
+          &node, {path, Kind::external_input}, {}, &node.output(), {}, {}};
+      discovered.inputs.emplace_back(&node.input(), "in");
+      nodes.push_back(std::move(discovered));
     } else if constexpr (std::same_as<T, structure::ExternalOutput>) {
       Node discovered{&node, {path, Kind::external_output}, {}, nullptr, {},
                       {}};
@@ -203,6 +205,13 @@ struct Plan {
     std::vector<bool> ready(nodes.size(), false);
     std::size_t remaining = 0;
     for (std::size_t i = 0; i < nodes.size(); ++i) {
+      if (nodes[i].info.kind == Kind::external_input) {
+        if (drivers[i][0] == nodes.size())
+          ready[i] = true;
+        else
+          ++remaining;
+        continue;
+      }
       if (!nodes[i].inputs.empty()) {
         for (std::size_t port = 0; port < drivers[i].size(); ++port) {
           if (drivers[i][port] == nodes.size())
@@ -291,13 +300,16 @@ struct Plan {
       if (found == nodes.end() || found->info.kind != Kind::external_input)
         return std::unexpected(Error{"foreign_input", ""});
       const auto i = static_cast<std::size_t>(found - nodes.begin());
+      if (drivers[i][0] != nodes.size())
+        return std::unexpected(Error{"driven_input", found->info.path});
       if (bound[i])
         return std::unexpected(Error{"duplicate_input", found->info.path});
       bound[i] = true;
       values[i] = binding.value().high();
     }
     for (std::size_t i = 0; i < nodes.size(); ++i)
-      if (nodes[i].info.kind == Kind::external_input && !bound[i])
+      if (nodes[i].info.kind == Kind::external_input &&
+          drivers[i][0] == nodes.size() && !bound[i])
         return std::unexpected(Error{"missing_input", nodes[i].info.path});
     for (const auto i : order)
       if (nodes[i].info.kind == Kind::not_gate)
@@ -310,10 +322,11 @@ struct Plan {
         values[i] = values[drivers[i][0]];
     Observation result;
     for (std::size_t i = 0; i < nodes.size(); ++i) {
-      for (std::size_t port = 0; port < nodes[i].inputs.size(); ++port)
-        result.signals.push_back(
-            {nodes[i].info.path + "." + nodes[i].inputs[port].second,
-             value::Bit{bool(values[drivers[i][port]])}});
+      if (nodes[i].info.kind != Kind::external_input)
+        for (std::size_t port = 0; port < nodes[i].inputs.size(); ++port)
+          result.signals.push_back(
+              {nodes[i].info.path + "." + nodes[i].inputs[port].second,
+               value::Bit{bool(values[drivers[i][port]])}});
       if (nodes[i].output)
         result.signals.push_back(
             {nodes[i].info.path + ".out", value::Bit{bool(values[i])}});

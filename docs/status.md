@@ -5,9 +5,9 @@ reproducible failures, and explanations as digital machines become more complex.
 The [design](design.md), [component contracts](component-contracts.md), and
 [roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
 [OR](or.md), [constant bit](constant-bit.md), [DFF](d-flip-flop.md),
-[gate-composed XOR](xor.md), [one-bit mux](mux-bit.md), and [fixed-width wire
-bundles](wire-bundles.md) are implemented. The next construction target is a
-word mux and small decoder.
+[gate-composed XOR](xor.md), [one-bit mux](mux-bit.md), [fixed-width wire
+bundles](wire-bundles.md), and [word mux](mux-word.md) are implemented. The
+next construction target is a small one-hot decoder.
 
 ## What runs today
 
@@ -35,6 +35,9 @@ truth tables; `bazel run //:constant_bit_demo` observes both constant values.
 `bazel run //:d_flip_flop_demo` prints a four-edge toggle trace with old Q, D,
 and new Q. `bazel run //:xor_demo` prints the XOR truth table from the derived
 NOT/AND/OR circuit; `bazel run //:mux_bit_demo` prints all selector/data rows.
+`bazel run //:mux_word_demo` shows one shared selector choosing a four-bit
+input through four gate-composed bit muxes. The shared selection test exhausts
+all 512 four-bit input and selector combinations and checks every bit-mux row.
 `bazel run //:wire_bundle_demo` routes four bits through an ordered bundle and
 prints the resulting bit sequence.
 

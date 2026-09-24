@@ -3,13 +3,16 @@
 #include "loom/components/and.h"
 #include "loom/components/not.h"
 #include "loom/components/or.h"
+#include "loom/components/selection_contract.h"
 #include "loom/structure/ports.h"
+#include <cstddef>
 #include <tuple>
 
 namespace loom::components {
 // A one-bit mux selects when_true for select=1 and when_false for select=0.
 class MuxBit final {
 public:
+  static constexpr std::size_t width = 1;
   const std::string name;
   explicit MuxBit(std::string label) : name(std::move(label)) {}
 
@@ -40,3 +43,5 @@ private:
   const Or result_{"result"};
 };
 } // namespace loom::components
+
+static_assert(loom::components::SelectionContract<loom::components::MuxBit, 1>);

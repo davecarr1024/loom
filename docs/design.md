@@ -21,8 +21,9 @@ This document specifies the target architecture. [Status](status.md) and
 [Phase 1](phase-1.md) describe the transitional register-only implementation;
 [NOT](not.md), [AND](and.md), [OR](or.md), [constant bit](constant-bit.md), and
 [DFF](d-flip-flop.md) document the initial atom floor; [XOR](xor.md) documents
-the first gate-composed component; [one-bit mux](mux-bit.md) documents the
-first selector.
+the first gate-composed component; [one-bit mux](mux-bit.md) and
+[word mux](mux-word.md) document width-parameterized selection; [wire
+bundles](wire-bundles.md) document ordered wiring views.
 [Roadmap](roadmap.md) owns construction order; [timing](timing.md) owns execution
 semantics; [component contracts](component-contracts.md) owns the acceptance
 and regression discipline. [Decisions](decisions.md) records the change in direction.
@@ -78,6 +79,12 @@ Definitions are concrete immutable C++ values with typed interfaces. A
 simulation separately owns all evolving state. Two simulations may share one
 const definition without sharing storage. No persistent machine value may hide
 in a callback, static variable, controller handler, or diagnostic adapter.
+
+An `ExternalInput` is either an unconnected boundary that receives a binding or
+a nested boundary driven through its inbound port by a parent connection. A
+driven boundary derives its value from that wire and cannot also be bound in an
+observation. This lets a parent compose a child without turning the child's
+inputs into a second top-level interface.
 
 Flattening a definition into an evaluation plan is allowed when it preserves
 child and port provenance. Replacing an assembled circuit with a monolithic

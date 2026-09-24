@@ -47,10 +47,12 @@ class ExternalInput final {
 public:
   const std::string name;
   explicit ExternalInput(std::string label) : name(std::move(label)) {}
+  const Input<1> &input() const { return input_; }
   const Output<1> &output() const { return output_; }
   Binding bind(value::Bit value) const { return Binding(&output_, value); }
 
 private:
+  const Input<1> input_;
   const Output<1> output_;
 };
 class ExternalOutput final {
