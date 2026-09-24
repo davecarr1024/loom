@@ -4,8 +4,9 @@ Loom now asks whether upward component construction can preserve local reasoning
 reproducible failures, and explanations as digital machines become more complex.
 The [design](design.md), [component contracts](component-contracts.md), and
 [roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
-[OR](or.md), [constant bit](constant-bit.md), [DFF](d-flip-flop.md), and
-[gate-composed XOR](xor.md) are implemented; a one-bit mux is next.
+[OR](or.md), [constant bit](constant-bit.md), [DFF](d-flip-flop.md),
+[gate-composed XOR](xor.md), and [one-bit mux](mux-bit.md) are implemented;
+fixed-width wire bundles are next.
 
 ## What runs today
 
@@ -32,7 +33,7 @@ the inventory and both rows of the two-NOT truth table with intermediate values.
 truth tables; `bazel run //:constant_bit_demo` observes both constant values.
 `bazel run //:d_flip_flop_demo` prints a four-edge toggle trace with old Q, D,
 and new Q. `bazel run //:xor_demo` prints the XOR truth table from the derived
-NOT/AND/OR circuit.
+NOT/AND/OR circuit; `bazel run //:mux_bit_demo` prints all selector/data rows.
 
 The retained Phase 1 register-only baseline provides typed registers and
 role-specific width-safe connections, nested ownership discovery, compile-time
@@ -78,9 +79,9 @@ available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build a one-bit mux through gate composition. Prove its selection truth table,
-interface semantics, and parent composition while preserving the accepted gate,
-constant, DFF, XOR, and register proofs.
+Build fixed-width bundles of wires with explicit indexing, concatenation, and
+splitting semantics. Preserve all gate, constant, DFF, XOR, mux, and register
+proofs.
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

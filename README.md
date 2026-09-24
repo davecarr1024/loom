@@ -16,12 +16,11 @@ choices visible. Tests harden each component and its containing assemblies.
 
 ## Status
 
-[The initial atom floor](docs/design.md) and
-[gate-composed XOR](docs/xor.md) are implemented. Circuits execute from owned
+[The initial atom floor](docs/design.md), [XOR](docs/xor.md), and the
+[one-bit mux](docs/mux-bit.md) are implemented. Circuits execute from owned
 components and connections; stateful circuits use independent simulation state
-with pure observations and
-atomic shared edges. The initial atom floor is complete. The one-bit mux is
-next; see [DFF](docs/d-flip-flop.md) and [XOR](docs/xor.md).
+with pure observations and atomic shared edges. Fixed-width wire bundles are
+next; see [DFF](docs/d-flip-flop.md).
 
 The tested register-only Phase 1 baseline remains transitional, with atomic wide
 registers to be replaced by composed flip-flops. See [roadmap](docs/roadmap.md)
@@ -44,6 +43,7 @@ bazel run //:and_demo
 bazel run //:constant_bit_demo
 bazel run //:d_flip_flop_demo
 bazel run //:xor_demo
+bazel run //:mux_bit_demo
 ```
 
 Run `bazel run //:format` to format C++ sources.

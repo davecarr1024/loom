@@ -64,6 +64,13 @@ cc_binary(
 )
 
 cc_binary(
+    name = "mux_bit_demo",
+    srcs = ["examples/mux_bit.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
+cc_binary(
     name = "transfer",
     srcs = ["examples/transfer.cpp"],
     copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],

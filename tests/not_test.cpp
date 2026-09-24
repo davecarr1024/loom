@@ -1,3 +1,4 @@
+#include "loom/components/mux_bit.h"
 #include "loom/components/xor.h"
 #include "loom/simulation/logic.h"
 #include <array>
@@ -7,6 +8,7 @@ namespace {
 using loom::components::And;
 using loom::components::ConstantBit;
 using loom::components::DFlipFlop;
+using loom::components::MuxBit;
 using loom::components::Not;
 using loom::components::Or;
 using loom::components::Xor;
@@ -537,6 +539,77 @@ TEST(Xor, ComposesWithNotAsTheSameObservedCircuit) {
     }
 }
 
+TEST(MuxBit, TruthTableAndDerivedGateComposition) {
+  const auto definition = Definition<MuxBit>::create("mux");
+  ASSERT_TRUE(definition);
+  EXPECT_EQ((*definition)->schedule(),
+            (std::vector<std::string>{"mux.invert_select", "mux.pass_false",
+                                      "mux.pass_true", "mux.result"}));
+  EXPECT_EQ((*definition)->connections().size(), 7U);
+  EXPECT_EQ((*definition)->inventory(),
+            (std::vector<loom::simulation::ComponentInfo>{
+                {"mux", Kind::composite},
+                {"mux.invert_select", Kind::not_gate},
+                {"mux.pass_false", Kind::and_gate},
+                {"mux.pass_true", Kind::and_gate},
+                {"mux.result", Kind::or_gate},
+                {"mux.select", Kind::external_input},
+                {"mux.when_false", Kind::external_input},
+                {"mux.when_true", Kind::external_input}}));
+  const auto find_value = [](const loom::simulation::Observation &observation,
+                             const std::string &path) {
+    const auto found = std::ranges::find(observation.signals, path,
+                                         &loom::simulation::Signal::path);
+    EXPECT_NE(found, observation.signals.end());
+    return found == observation.signals.end() ? false : found->value.high();
+  };
+  for (const bool select : {false, true})
+    for (const bool when_false : {false, true})
+      for (const bool when_true : {false, true}) {
+        const auto &root = (*definition)->root();
+        const std::array inputs{root.select().bind(Bit{select}),
+                                root.when_false().bind(Bit{when_false}),
+                                root.when_true().bind(Bit{when_true})};
+        const auto observed = (*definition)->observe(inputs);
+        ASSERT_TRUE(observed);
+        EXPECT_EQ(find_value(*observed, "mux.pass_false.out"),
+                  !select && when_false);
+        EXPECT_EQ(find_value(*observed, "mux.pass_true.out"),
+                  select && when_true);
+        EXPECT_EQ(find_value(*observed, "mux.result.out"),
+                  select ? when_true : when_false);
+      }
+}
+
+struct InvertedMux {
+  const std::string name = "inverted_mux";
+  MuxBit mux{"mux"};
+  Not invert{"invert"};
+  ExternalOutput output{"output"};
+  auto children() const { return std::tie(mux, invert, output); }
+  auto connections() const {
+    return std::tuple{connect(mux.output(), invert.input()),
+                      connect(invert.output(), output.input())};
+  }
+};
+
+TEST(MuxBit, ComposesWithNotAtParentBoundary) {
+  const auto definition = Definition<InvertedMux>::create();
+  ASSERT_TRUE(definition);
+  for (const bool select : {false, true})
+    for (const bool when_false : {false, true})
+      for (const bool when_true : {false, true}) {
+        const auto &mux = (*definition)->root().mux;
+        const std::array inputs{mux.select().bind(Bit{select}),
+                                mux.when_false().bind(Bit{when_false}),
+                                mux.when_true().bind(Bit{when_true})};
+        const auto observed = (*definition)->observe(inputs);
+        ASSERT_TRUE(observed);
+        EXPECT_EQ(observed->signals.back().value.high(),
+                  !(select ? when_true : when_false));
+      }
+}
+
 struct LoadDff {
   const std::string name = "load";
   ExternalInput input{"input"};
@@ -722,6 +795,7 @@ static_assert(!std::is_copy_constructible_v<And>);
 static_assert(!std::is_copy_constructible_v<Or>);
 static_assert(!std::is_copy_constructible_v<ConstantBit>);
 static_assert(!std::is_copy_constructible_v<Xor>);
+static_assert(!std::is_copy_constructible_v<MuxBit>);
 static_assert(!std::is_copy_constructible_v<DFlipFlop>);
 static_assert(!std::is_copy_constructible_v<Simulation<LoadDff>>);
 static_assert(!loom::simulation::CircuitRoot<Inverter &>);

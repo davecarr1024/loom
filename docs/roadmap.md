@@ -26,15 +26,17 @@ enumeration independence, transient snapshots, and retained values. The existing
 register baseline remains tested. These are the completed NOT requirements,
 not completion of group A.
 
-**NOT, AND, OR, constant bit, initialized DFF, and gate-composed XOR are
-implemented and accepted:**
+**NOT, AND, OR, constant bit, initialized DFF, gate-composed XOR, and one-bit
+mux are implemented and accepted:**
 see [NOT](not.md), [AND](and.md), [OR](or.md), [constant bit](constant-bit.md),
-and [DFF](d-flip-flop.md), plus [XOR](xor.md). The combinational atoms prove
+and [DFF](d-flip-flop.md), plus [XOR](xor.md) and [mux](mux-bit.md). The
+combinational atoms prove
 their truth tables and parent composition. The DFF proves initial state,
 transient observation, edge-0 equivalence, repeated sampling, feedback,
 independent simulations, and simultaneous commit. XOR proves its truth table,
-gate inventory, schedule, and parent composition. Preserve these and the
-transitional register proofs. **Next: one-bit mux**.
+gate inventory, schedule, and parent composition. Mux proves every selector/data
+row and parent composition. Preserve these and the transitional register proofs.
+**Next: fixed-width wire bundles**.
 Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor
@@ -61,7 +63,7 @@ Checkpoint: can the whole evaluation algorithm be explained using only this floo
 
 ## B. Selection and bit bundles
 
-XOR is accepted as a gate-composed component. Construct a one-bit mux,
+XOR and a one-bit mux are accepted as gate-composed components. Next construct
 fixed-width bundles of wires, then a word mux and small decoder. Mux behavior
 must be gate composition. Bit indexing,
 concatenation, splitting, and fan-out are explicit wiring with documented ordering.

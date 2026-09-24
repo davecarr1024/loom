@@ -14,5 +14,5 @@ XOR output and a NOT through the same plan.
 the expected child schedule, eight actual wires, both product terms, and parent
 composition. Run
 `bazel run //:xor_demo` for the truth table through the same observation path.
-The next component is a one-bit mux built from the accepted gates; see the
-[roadmap](roadmap.md).
+The one-bit [mux](mux-bit.md) extends the same gates with selection semantics.
+Fixed-width wire bundles follow under the [roadmap](roadmap.md).

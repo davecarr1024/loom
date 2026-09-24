@@ -22,4 +22,5 @@ The dependency engine represents zero, one, or multiple input endpoints
 per node. Existing NOT, boundary, malformed-wiring, cycle, and Phase 1 register
 tests continue to pass. [OR](or.md) extends the same multi-input model; a
 constant bit and DFF now complete the initial atom floor. Gate-composed
-[XOR](xor.md) extends those atoms; a one-bit mux follows in [the roadmap](roadmap.md).
+[XOR](xor.md) and [one-bit mux](mux-bit.md) extend those atoms. Fixed-width
+bundles follow in [the roadmap](roadmap.md).

@@ -21,7 +21,8 @@ This document specifies the target architecture. [Status](status.md) and
 [Phase 1](phase-1.md) describe the transitional register-only implementation;
 [NOT](not.md), [AND](and.md), [OR](or.md), [constant bit](constant-bit.md), and
 [DFF](d-flip-flop.md) document the initial atom floor; [XOR](xor.md) documents
-the first gate-composed component.
+the first gate-composed component; [one-bit mux](mux-bit.md) documents the
+first selector.
 [Roadmap](roadmap.md) owns construction order; [timing](timing.md) owns execution
 semantics; [component contracts](component-contracts.md) owns the acceptance
 and regression discipline. [Decisions](decisions.md) records the change in direction.

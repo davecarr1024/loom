@@ -21,5 +21,6 @@ truth table through the same definition and observation path.
 The existing multi-input dependency representation serves both AND and OR.
 Their local semantics remain explicit and separate in the exact atom dispatch.
 The [constant bit](constant-bit.md) and [DFF](d-flip-flop.md) complete the
-initial atom floor. [XOR](xor.md) is the first gate-composed component; a
-one-bit mux follows under [the roadmap](roadmap.md).
+initial atom floor. [XOR](xor.md) and [one-bit mux](mux-bit.md) are the first
+gate-composed selection components; fixed-width bundles follow under
+[the roadmap](roadmap.md).

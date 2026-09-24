@@ -9,17 +9,18 @@ Consult [decisions](docs/decisions.md) for settled boundaries and
 ## Current gate
 
 The register-only Phase 1 baseline is transitional. The revised construction
-plan has accepted NOT, AND, OR, constant bit, initialized DFF, and gate-composed
-XOR. The one-bit mux is next. Read the component contracts under `docs/` for
-those APIs. Do not resume the shelved arithmetic prototype.
+plan has accepted NOT, AND, OR, constant bit, initialized DFF, gate-composed
+XOR, and one-bit mux. Fixed-width wire bundles are next. Read the component
+contracts under `docs/` for those APIs. Do not resume the shelved arithmetic
+prototype.
 `./scripts/check.sh` is the presubmit command. It runs `bazel test //...`,
 then Bazel LCOV coverage and the 100% production line/function gate.
 `bazel test //...` runs behavioral, docs, compile-fail, formatting, and
 static-analysis checks. Run `bazel run //:format` to apply C++ formatting. Use
 `bazel run //:not_demo`, `bazel run //:and_demo`, `bazel run //:or_demo`, and
 `bazel run //:constant_bit_demo`, `bazel run //:d_flip_flop_demo`,
-`bazel run //:xor_demo`, and `bazel run //:transfer` to run the examples. The
-workspace pins Clang 19 through
+`bazel run //:xor_demo`, `bazel run //:mux_bit_demo`, and
+`bazel run //:transfer` to run the examples. The workspace pins Clang 19 through
 `.bazelrc`; install Bazelisk and Clang/LLVM 19, including clang-format,
 clang-tidy, llvm-cov, and llvm-profdata, first.
 
