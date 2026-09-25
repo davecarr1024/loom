@@ -95,13 +95,15 @@ interfaces readable without hiding computation?
 **A DFF-composed word register is implemented and accepted:** see
 [its contract and evidence](word-register.md). It exposes least-significant-first
 data/output bundles and explicit per-bit initialization; tests cover initial Q,
-whole-word edge loading, retained evidence, and parent wiring. Next construct an
+whole-word edge loading, retained evidence, and parent wiring.
 **An enabled word register is implemented and accepted:** see
 [its contract and evidence](enabled-word-register.md). It loads or holds through
 owned MuxWord and WordRegister children; a shared readable-word contract captures
-the shape consumers use. Next construct a shift register. Establish typed
-data/enable interfaces and explicit initialization. Migrate the transfer baseline
-to this implementation:
+the shape consumers use. **A serial shift register is implemented and
+accepted:** see [its contract and evidence](shift-register.md). Its enable and
+serial input are typed boundaries, and its shift direction and serial insertion
+are tested over repeated edges, including width one and parent composition. The
+next task is to migrate the transfer baseline to these components:
 its wide atomic storage and enabled-path script adapter must then disappear
 from the supported production model. Preserve the old transfer/hold/swap
 behavior through tests at the replacement interface, not a permanent second engine.

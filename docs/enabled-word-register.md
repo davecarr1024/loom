@@ -19,5 +19,6 @@ word. Tests check load and hold data, all child DFFs and mux gates in the
 inventory, parent wiring and observation, and the driven-input diagnostic. Run
 `bazel run //:enabled_word_register_demo` for a load/hold trace.
 
-The next register component shifts one position toward the most-significant bit
-and accepts a serial input at bit 0. See the [roadmap](roadmap.md).
+The [shift register](shift-register.md) uses this load/hold component to move a
+word one position toward the most-significant bit while accepting serial input
+at bit 0. See the [roadmap](roadmap.md).

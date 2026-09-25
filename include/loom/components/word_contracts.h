@@ -22,4 +22,12 @@ concept EnabledWord =
       { component.data_input() } -> std::same_as<structure::InputBundle<Width>>;
     };
 
+// Shiftable words add an explicit serial source and synchronous shift control.
+template <class Component, std::size_t Width>
+concept ShiftableWord =
+    ReadableWord<Component, Width> && requires(const Component &component) {
+      { component.enable_input() } -> std::same_as<const structure::Input<1> &>;
+      { component.serial_input() } -> std::same_as<const structure::Input<1> &>;
+    };
+
 } // namespace loom::components

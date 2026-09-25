@@ -9,7 +9,8 @@ The [design](design.md), [component contracts](component-contracts.md), and
 bundles](wire-bundles.md), [word mux](mux-word.md), a [two-to-four
 decoder](decoder-2-to-4.md), and a [word register](word-register.md) are
 implemented. An [enabled word register](enabled-word-register.md) is also
-implemented; a shift register is next.
+implemented, as is a [serial shift register](shift-register.md). The remaining
+register milestone is to migrate the transfer baseline onto composed storage.
 
 ## What runs today
 
@@ -49,6 +50,9 @@ verify the pre-edge initialized value and post-edge loaded value.
 `bazel run //:enabled_word_register_demo` demonstrates load and hold. The
 enabled register selects old Q or input data through its child word mux; tests
 check the gate inventory, DFF commits, both control values, and parent wiring.
+`bazel run //:shift_register_demo` shifts a four-bit word toward higher bit
+indices and injects the serial bit at index 0. Tests cover repeated shifts,
+hold, width one, and parent boundary wiring.
 `bazel run //:wire_bundle_demo` routes four bits through an ordered bundle and
 prints the resulting bit sequence.
 
