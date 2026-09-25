@@ -18,6 +18,6 @@ later steps cannot overwrite. Tests verify all four stored bits, loading,
 retained edge evidence, the DFF inventory, and data/output wiring in a parent.
 Run `bazel run //:word_register_demo` for a short load trace.
 
-This is the always-loading word contract. The next component adds an explicit
-enable through word selection and register composition; see the
-[roadmap](roadmap.md).
+This is the always-loading word contract. The
+[enabled word register](enabled-word-register.md) adds an explicit enable
+through word selection and register composition; see the [roadmap](roadmap.md).

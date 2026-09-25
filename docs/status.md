@@ -8,8 +8,8 @@ The [design](design.md), [component contracts](component-contracts.md), and
 [gate-composed XOR](xor.md), [one-bit mux](mux-bit.md), [fixed-width wire
 bundles](wire-bundles.md), [word mux](mux-word.md), a [two-to-four
 decoder](decoder-2-to-4.md), and a [word register](word-register.md) are
-implemented. Selection and bit-bundle group B is complete; an enabled register
-is next.
+implemented. An [enabled word register](enabled-word-register.md) is also
+implemented; a shift register is next.
 
 ## What runs today
 
@@ -46,6 +46,9 @@ inverted address bits through the actual NOT/AND inventory.
 `bazel run //:word_register_demo` loads whole words over shared edges through
 four initialized child DFFs. Parent tests connect input and output bundles and
 verify the pre-edge initialized value and post-edge loaded value.
+`bazel run //:enabled_word_register_demo` demonstrates load and hold. The
+enabled register selects old Q or input data through its child word mux; tests
+check the gate inventory, DFF commits, both control values, and parent wiring.
 `bazel run //:wire_bundle_demo` routes four bits through an ordered bundle and
 prints the resulting bit sequence.
 

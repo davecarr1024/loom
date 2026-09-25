@@ -19,7 +19,8 @@ choices visible. Tests harden each component and its containing assemblies.
 [The initial atom floor](docs/design.md), [XOR](docs/xor.md), the
 [one-bit mux](docs/mux-bit.md), [fixed-width wire bundles](docs/wire-bundles.md),
 the [word mux](docs/mux-word.md), a [two-to-four decoder](docs/decoder-2-to-4.md),
-and a [DFF-composed word register](docs/word-register.md) are implemented.
+a [DFF-composed word register](docs/word-register.md), and an
+[enabled word register](docs/enabled-word-register.md) are implemented.
 Circuits execute from owned
 components and connections; stateful circuits use independent simulation state
 with pure observations and atomic shared edges. See [DFF](docs/d-flip-flop.md)
@@ -68,6 +69,7 @@ bazel run //:mux_bit_demo
 bazel run //:mux_word_demo
 bazel run //:decoder2_to4_demo
 bazel run //:word_register_demo
+bazel run //:enabled_word_register_demo
 bazel run //:wire_bundle_demo
 ```
 
@@ -85,6 +87,7 @@ compile-fail, formatting, compatible static-analysis, and production coverage ga
 - [Word mux](docs/mux-word.md): width-parameterized selection composed from one-bit muxes.
 - [Two-to-four decoder](docs/decoder-2-to-4.md): one-hot address decoding composed from gates.
 - [Word register](docs/word-register.md): fixed-width edge-loaded storage composed from initialized DFFs.
+- [Enabled word register](docs/enabled-word-register.md): synchronous load and hold through mux/DFF composition.
 - [Roadmap](docs/roadmap.md): component dependencies, proofs, and checkpoints.
 - [Decisions](docs/decisions.md): revised direction and withdrawn assumptions.
 - [Baseline](docs/baseline.md): inherited IRATA2 and Rule Lab lessons.
