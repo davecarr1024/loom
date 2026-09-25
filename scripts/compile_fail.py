@@ -16,6 +16,7 @@ cases = {
     "bundle_width": ("tests/compile_fail/bundle_width.cpp", ("connect", "no matching function")),
     "bundle_role": ("tests/compile_fail/bundle_role.cpp", ("connect", "no matching function")),
     "mux_word_zero_width": ("tests/compile_fail/mux_word_zero_width.cpp", ("word mux width must be positive",)),
+    "word_register_zero_width": ("tests/compile_fail/word_register_zero_width.cpp", ("word register width must be positive",)),
 }
 source, required = cases[case]
 result = subprocess.run(

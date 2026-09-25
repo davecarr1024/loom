@@ -92,9 +92,13 @@ interfaces readable without hiding computation?
 
 ## C. Registers and movement
 
-Construct a word register from DFFs, an enabled register from register/mux
-composition, then a shift register. Establish typed data/enable interfaces and
-explicit initialization. Migrate the transfer baseline to this implementation:
+**A DFF-composed word register is implemented and accepted:** see
+[its contract and evidence](word-register.md). It exposes least-significant-first
+data/output bundles and explicit per-bit initialization; tests cover initial Q,
+whole-word edge loading, retained evidence, and parent wiring. Next construct an
+enabled register from word-register/mux composition, then a shift register.
+Establish typed data/enable interfaces and explicit initialization. Migrate the
+transfer baseline to this implementation:
 its wide atomic storage and enabled-path script adapter must then disappear
 from the supported production model. Preserve the old transfer/hold/swap
 behavior through tests at the replacement interface, not a permanent second engine.

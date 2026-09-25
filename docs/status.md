@@ -6,9 +6,10 @@ The [design](design.md), [component contracts](component-contracts.md), and
 [roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
 [OR](or.md), [constant bit](constant-bit.md), [DFF](d-flip-flop.md),
 [gate-composed XOR](xor.md), [one-bit mux](mux-bit.md), [fixed-width wire
-bundles](wire-bundles.md), [word mux](mux-word.md), and a [two-to-four
-decoder](decoder-2-to-4.md) are implemented. Selection and bit-bundle group B
-is complete; the word register is next.
+bundles](wire-bundles.md), [word mux](mux-word.md), a [two-to-four
+decoder](decoder-2-to-4.md), and a [word register](word-register.md) are
+implemented. Selection and bit-bundle group B is complete; an enabled register
+is next.
 
 ## What runs today
 
@@ -42,6 +43,9 @@ all 512 four-bit input and selector combinations and checks every bit-mux row.
 `bazel run //:decoder2_to4_demo` prints every two-bit address and its one-hot
 four-output decode. Tests verify all four addresses and both intermediate
 inverted address bits through the actual NOT/AND inventory.
+`bazel run //:word_register_demo` loads whole words over shared edges through
+four initialized child DFFs. Parent tests connect input and output bundles and
+verify the pre-edge initialized value and post-edge loaded value.
 `bazel run //:wire_bundle_demo` routes four bits through an ordered bundle and
 prints the resulting bit sequence.
 
