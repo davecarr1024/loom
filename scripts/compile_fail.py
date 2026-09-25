@@ -19,6 +19,7 @@ cases = {
     "enabled_word_register_zero_width": ("tests/compile_fail/enabled_word_register_zero_width.cpp", ("enabled word register width must be positive",)),
     "shift_register_zero_width": ("tests/compile_fail/shift_register_zero_width.cpp", ("shift register width must be positive",)),
     "register_bank_2_zero_width": ("tests/compile_fail/register_bank_2_zero_width.cpp", ("register bank width must be positive",)),
+    "ripple_adder_zero_width": ("tests/compile_fail/ripple_adder_zero_width.cpp", ("ripple adder width must be positive",)),
 }
 source, required = cases[case]
 result = subprocess.run(

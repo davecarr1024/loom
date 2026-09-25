@@ -13,9 +13,10 @@ implemented, as is a [serial shift register](shift-register.md). Register and
 movement group C is complete. Group D's [two-source selected bus](selected-bus.md)
 and [two-register bank](register-bank-2.md) are implemented and tested; the
 bank's read and write paths are built from selected buses and composed
-registers. The first arithmetic component, a [half adder](half-adder.md), is
-implemented and tested. The [full adder](full-adder.md) also passes all eight
-input cases; a small ripple adder is next.
+registers. The [half adder](half-adder.md), [full adder](full-adder.md), and
+[four-bit ripple adder](ripple-adder.md) are implemented and tested. The ripple
+adder exhausts every four-bit operand pair and carry-in; increment and equality
+components are next.
 
 ## What runs today
 
@@ -74,6 +75,9 @@ gate/DFF inventory, and parent output wiring.
 tests verify the XOR/AND inventory and connect both outputs through a parent.
 `bazel run //:full_adder_demo` prints all eight operand/carry rows. Tests verify
 the two-half-adder plus OR structure and carry propagation through a parent.
+`bazel run //:ripple_adder_demo` shows four-bit overflow from 9 + 7. Tests
+exhaust all input words and carry-in, inspect each intermediate ripple carry,
+verify the gate inventory, and check parent output wiring.
 
 The archived [Phase 1](phase-1.md) document records the removed wide-register
 API and toolchain history. `tests/circuit_test.cpp` now exhausts all four-bit
@@ -115,9 +119,8 @@ available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build a small ripple adder from accepted full adders. Continue with the
-incrementer, equality comparison, and minimal
-ALU described in the [roadmap](roadmap.md).
+Build an incrementer and equality comparator from accepted components, then
+the minimal ALU described in the [roadmap](roadmap.md).
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

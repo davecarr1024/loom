@@ -16,7 +16,7 @@ filegroup(
 
 cc_test(
     name = "circuit_tests",
-    srcs = ["tests/circuit_test.cpp", "tests/not_test.cpp", "tests/wire_bundle_test.cpp", "tests/mux_word_test.cpp", "tests/decoder_test.cpp", "tests/word_register_test.cpp", "tests/enabled_word_register_test.cpp", "tests/shift_register_test.cpp", "tests/selected_bus_test.cpp", "tests/register_bank_2_test.cpp", "tests/half_adder_test.cpp", "tests/full_adder_test.cpp"],
+    srcs = ["tests/circuit_test.cpp", "tests/not_test.cpp", "tests/wire_bundle_test.cpp", "tests/mux_word_test.cpp", "tests/decoder_test.cpp", "tests/word_register_test.cpp", "tests/enabled_word_register_test.cpp", "tests/shift_register_test.cpp", "tests/selected_bus_test.cpp", "tests/register_bank_2_test.cpp", "tests/half_adder_test.cpp", "tests/full_adder_test.cpp", "tests/ripple_adder_test.cpp"],
     copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
     deps = [":loom", "@googletest//:gtest_main"],
 )
@@ -147,6 +147,13 @@ cc_binary(
     deps = [":loom"],
 )
 
+cc_binary(
+    name = "ripple_adder_demo",
+    srcs = ["examples/ripple_adder.cpp"],
+    copts = ["-std=c++23", "-Wall", "-Wextra", "-Wpedantic"],
+    deps = [":loom"],
+)
+
 filegroup(
     name = "docs",
     srcs = glob(["*.md", "docs/*.md"]),
@@ -249,6 +256,14 @@ py_test(
     srcs = ["scripts/compile_fail.py"],
     main = "scripts/compile_fail.py",
     args = ["register_bank_2_zero_width"],
+    data = [":compile_fail_sources", ":loom_headers"],
+)
+
+py_test(
+    name = "ripple_adder_zero_width",
+    srcs = ["scripts/compile_fail.py"],
+    main = "scripts/compile_fail.py",
+    args = ["ripple_adder_zero_width"],
     data = [":compile_fail_sources", ":loom_headers"],
 )
 
