@@ -16,5 +16,6 @@ bus input boundaries and connect the bus output to a destination input.
 four-bit source words, checks the 43-component derived inventory, and routes
 the chosen word into a parent output boundary. Run
 `bazel run //:selected_bus_demo` for a four-bit boundary-to-output example.
-This is the first group-D component; the register bank that consumes it
-remains ahead.
+This is the first group-D component; the
+[two-register bank](register-bank-2.md) composes selected buses around its
+enabled word registers.

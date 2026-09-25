@@ -10,9 +10,10 @@ bundles](wire-bundles.md), [word mux](mux-word.md), a [two-to-four
 decoder](decoder-2-to-4.md), and a [word register](word-register.md) are
 implemented. An [enabled word register](enabled-word-register.md) is also
 implemented, as is a [serial shift register](shift-register.md). Register and
-movement group C is complete. The first group-D component, a [two-source
-selected bus](selected-bus.md), is implemented and tested; a bus-connected
-register bank is next.
+movement group C is complete. Group D's [two-source selected bus](selected-bus.md)
+and [two-register bank](register-bank-2.md) are implemented and tested; the
+bank's read and write paths are built from selected buses and composed
+registers. Arithmetic components are next.
 
 ## What runs today
 
@@ -62,6 +63,11 @@ prints the resulting bit sequence.
 per-bit mux outputs. `tests/selected_bus_test.cpp` exhausts both selector
 values and all four-bit source pairs, then verifies propagation into a parent
 boundary.
+`bazel run //:register_bank_2_demo` transfers the selected register-zero word
+to register one over one shared edge. Tests cover all source/destination
+address pairs, external versus register write data, hold, simultaneous
+pre-edge reads, invalid-input atomicity, independent simulations, the derived
+gate/DFF inventory, and parent output wiring.
 
 The archived [Phase 1](phase-1.md) document records the removed wide-register
 API and toolchain history. `tests/circuit_test.cpp` now exhausts all four-bit
@@ -103,9 +109,9 @@ available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build the register bank that can send and receive through the accepted
-two-source selected bus. Keep selection validity explicit and preserve all
-gate, selection, and register proofs.
+Build a half adder from the accepted gate components. Continue with the
+full-adder, small ripple adder, incrementer, equality comparison, and minimal
+ALU described in the [roadmap](roadmap.md).
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new

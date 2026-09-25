@@ -128,17 +128,23 @@ Checkpoint: can register behavior be explained entirely through child circuits?
 **A two-source selected bus is implemented and accepted:** see
 [its contract and evidence](selected-bus.md). Both selector values are valid;
 it owns a word mux and has no idle, tri-state, or invalid-consumption state.
-Construct a register bank that can send and receive through the bus. Use a
-bounded source-selection interface;
-if idle is useful, represent it explicitly with validity and define invalid
-consumption. Do not model tri-state resolution or retained values on an undriven bus.
+**A two-register bank is implemented and accepted:** see
+[its contract and evidence](register-bank-2.md). Its two selected buses carry
+external or register data into the enabled destination, and its read bus
+selects either stored word. Typed binary addresses represent every valid
+choice. Both selector bits use every encoding, so neither bus has an idle or
+invalid-selection state. Keep that property explicit; any future wider selector
+must define or reject reserved encodings. Do not model tri-state resolution or
+retained values on an undriven bus. Group D is complete; next is arithmetic.
 
-Proof: each source/destination, independent same-width buses, fan-out, transfer
-and hold, and rejected invalid selection/consumption with atomic state behavior.
-An ordinary input still has exactly one driver; selection happens inside the
-bus circuit. Test a parent wiring mistake at its integration boundary.
+Proof: each source/destination, read and write buses, fan-out, transfer and
+hold, independent simulation state, and rejected invalid external bindings
+with atomic state behavior. An ordinary input still has exactly one driver;
+selection happens inside the bus circuit. Test a duplicate parent driver at
+the integration boundary.
 
-Artifact: a transfer expanded into selection, mux outputs, and destination D/Q.
+Artifact: a register transfer expanded into source selection, mux outputs,
+destination enables, and child D/Q state.
 Checkpoint: do controls describe meaningful resource choices in code?
 
 ## E. Arithmetic and the ALU
