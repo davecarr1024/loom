@@ -13,7 +13,8 @@ implemented, as is a [serial shift register](shift-register.md). Register and
 movement group C is complete. Group D's [two-source selected bus](selected-bus.md)
 and [two-register bank](register-bank-2.md) are implemented and tested; the
 bank's read and write paths are built from selected buses and composed
-registers. Arithmetic components are next.
+registers. The first arithmetic component, a [half adder](half-adder.md), is
+implemented and tested; the full adder is next.
 
 ## What runs today
 
@@ -68,6 +69,8 @@ to register one over one shared edge. Tests cover all source/destination
 address pairs, external versus register write data, hold, simultaneous
 pre-edge reads, invalid-input atomicity, independent simulations, the derived
 gate/DFF inventory, and parent output wiring.
+`bazel run //:half_adder_demo` prints all operand, sum, and carry rows. The
+tests verify the XOR/AND inventory and connect both outputs through a parent.
 
 The archived [Phase 1](phase-1.md) document records the removed wide-register
 API and toolchain history. `tests/circuit_test.cpp` now exhausts all four-bit
@@ -109,8 +112,8 @@ available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build a half adder from the accepted gate components. Continue with the
-full-adder, small ripple adder, incrementer, equality comparison, and minimal
+Build the full adder from accepted components. Continue with the small ripple
+adder, incrementer, equality comparison, and minimal
 ALU described in the [roadmap](roadmap.md).
 
 The useful lesson from the baseline is that stable ownership and simultaneous

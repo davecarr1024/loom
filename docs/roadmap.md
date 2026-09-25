@@ -149,7 +149,9 @@ Checkpoint: do controls describe meaningful resource choices in code?
 
 ## E. Arithmetic and the ALU
 
-Construct half adder, full adder, small ripple adder, incrementer, equality
+**A half adder is implemented and accepted:** see
+[its contract and evidence](half-adder.md). Its sum and carry are the tested
+XOR and AND children. Construct a full adder, small ripple adder, incrementer, equality
 comparison, and a small ALU using Boolean and selection components. Choose the
 ALU's minimal operation set for the forthcoming accumulator datapath; do not
 add speculative operations. Build a counter from incrementer and register.
