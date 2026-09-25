@@ -23,7 +23,8 @@ This document specifies the target architecture. [Status](status.md) and
 [DFF](d-flip-flop.md) document the initial atom floor; [XOR](xor.md) documents
 the first gate-composed component; [one-bit mux](mux-bit.md) and
 [word mux](mux-word.md) document width-parameterized selection; [wire
-bundles](wire-bundles.md) document ordered wiring views.
+bundles](wire-bundles.md) document ordered wiring views; the
+[two-to-four decoder](decoder-2-to-4.md) documents total one-hot decoding.
 [Roadmap](roadmap.md) owns construction order; [timing](timing.md) owns execution
 semantics; [component contracts](component-contracts.md) owns the acceptance
 and regression discipline. [Decisions](decisions.md) records the change in direction.

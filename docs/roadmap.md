@@ -42,8 +42,11 @@ endpoint identity; simulation finalizes each expanded wire through the existing
 plan. **The width-parameterized word mux is implemented and accepted:** see
 [its contract and evidence](mux-word.md). The shared selection contract is
 proved for bit and word muxes; all one-bit rows and all 512 four-bit input and
-selector combinations pass, including parent composition. **Next: a small
-decoder.**
+selector combinations pass, including parent composition. **The two-to-four
+one-hot decoder is implemented and accepted:** see
+[its contract and evidence](decoder-2-to-4.md). All four addresses produce one
+high output at the matching index, and its NOT/AND inventory and parent-boundary
+composition are tested. **Group B is complete; next: word register and movement.**
 Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor
@@ -71,20 +74,21 @@ Checkpoint: can the whole evaluation algorithm be explained using only this floo
 ## B. Selection and bit bundles
 
 XOR and one-bit muxes are accepted as gate-composed components. Fixed-width
-bundles and a word mux are accepted; next construct a small decoder. Mux
-behavior must be gate composition. Bit indexing,
+bundles, the word mux, and the two-to-four one-hot decoder are accepted. Mux and
+decoder behavior must be gate composition. Bit indexing,
 concatenation, splitting, and fan-out are explicit wiring with documented ordering.
 
-Proof: exhaustive one-bit and four-bit selection, all decoder addresses,
+Proof: exhaustive one-bit and four-bit selection, every decoder address and
+exactly one active output,
 representative bundle widths, independent same-width paths, and no behavior
 introduced by adapters.
 Inventory demonstrates the gates used; a parent trace expands a selected output
 into its input ports. Define all selector patterns or reject reserved encodings.
 
-Artifact: a selected word traced through the actual bit muxes; follow with a
-decoded address expanded to its one-hot gates. The width-parameterized
-selection contract has shared tests for bit and word muxes. Checkpoint: do
-bundles make interfaces readable without hiding computation?
+Artifact: a selected word traced through the actual bit muxes and a decoded
+address expanded to its one-hot gates. The width-parameterized selection
+contract has shared tests for bit and word muxes. Checkpoint: do bundles make
+interfaces readable without hiding computation?
 
 ## C. Registers and movement
 

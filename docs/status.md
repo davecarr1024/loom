@@ -6,8 +6,9 @@ The [design](design.md), [component contracts](component-contracts.md), and
 [roadmap](roadmap.md) define that direction. [NOT](not.md), [AND](and.md),
 [OR](or.md), [constant bit](constant-bit.md), [DFF](d-flip-flop.md),
 [gate-composed XOR](xor.md), [one-bit mux](mux-bit.md), [fixed-width wire
-bundles](wire-bundles.md), and [word mux](mux-word.md) are implemented. The
-next construction target is a small one-hot decoder.
+bundles](wire-bundles.md), [word mux](mux-word.md), and a [two-to-four
+decoder](decoder-2-to-4.md) are implemented. Selection and bit-bundle group B
+is complete; the word register is next.
 
 ## What runs today
 
@@ -38,6 +39,9 @@ NOT/AND/OR circuit; `bazel run //:mux_bit_demo` prints all selector/data rows.
 `bazel run //:mux_word_demo` shows one shared selector choosing a four-bit
 input through four gate-composed bit muxes. The shared selection test exhausts
 all 512 four-bit input and selector combinations and checks every bit-mux row.
+`bazel run //:decoder2_to4_demo` prints every two-bit address and its one-hot
+four-output decode. Tests verify all four addresses and both intermediate
+inverted address bits through the actual NOT/AND inventory.
 `bazel run //:wire_bundle_demo` routes four bits through an ordered bundle and
 prints the resulting bit sequence.
 
