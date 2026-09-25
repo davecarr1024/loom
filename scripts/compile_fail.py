@@ -4,11 +4,10 @@ import sys
 import os
 from pathlib import Path
 
-case = sys.argv[1] if len(sys.argv) > 1 else "wrong_width"
+case = sys.argv[1] if len(sys.argv) > 1 else "logic_width"
 root = Path(os.environ["TEST_SRCDIR"]) / os.environ["TEST_WORKSPACE"]
 compiler = os.environ.get("CXX", "clang++-19")
 cases = {
-    "wrong_width": ("tests/wrong_width.cpp", ("connect", "deduced conflicting")),
     "logic_width": ("tests/compile_fail/logic_width.cpp", ("connect", "deduced conflicting")),
     "logic_role": ("tests/compile_fail/logic_role.cpp", ("connect", "no matching function")),
     "numeric_bit": ("tests/compile_fail/numeric_bit.cpp", ("Bit", "constraints not satisfied")),

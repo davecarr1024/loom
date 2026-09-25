@@ -133,15 +133,7 @@ py_test(
 
 filegroup(
     name = "compile_fail_sources",
-    srcs = ["tests/wrong_width.cpp"] + glob(["tests/compile_fail/*.cpp"]),
-)
-
-py_test(
-    name = "wrong_width",
-    srcs = ["scripts/compile_fail.py"],
-    main = "scripts/compile_fail.py",
-    args = ["wrong_width"],
-    data = [":compile_fail_sources", ":loom_headers"],
+    srcs = glob(["tests/compile_fail/*.cpp"]),
 )
 
 py_test(

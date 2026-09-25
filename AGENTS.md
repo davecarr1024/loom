@@ -8,14 +8,13 @@ Consult [decisions](docs/decisions.md) for settled boundaries and
 
 ## Current gate
 
-The register-only Phase 1 baseline is transitional. The revised construction
-plan has accepted NOT, AND, OR, constant bit, initialized DFF, gate-composed
-XOR, one-bit mux, fixed-width wire bundles, a width-parameterized word mux,
+The old register-only Phase 1 implementation has been retired. The revised
+construction plan has accepted NOT, AND, OR, constant bit, initialized DFF,
+gate-composed XOR, one-bit mux, fixed-width wire bundles, a word mux,
 two-to-four decoder, a DFF-composed word register, an enabled word register,
-and a shift register.
-Read the relevant component contract under `docs/` before extending a component.
-The transfer baseline migration is next. Do not resume the shelved arithmetic
-prototype.
+and a shift register. Register/movement group C is complete. The selected bus
+and register bank are next. Read the relevant contract under `docs/` before
+extending a component. Do not resume the shelved arithmetic prototype.
 `./scripts/check.sh` is the presubmit command. It runs `bazel test //...`,
 then Bazel LCOV coverage and the 100% production line/function gate.
 `bazel test //...` runs behavioral, docs, compile-fail, formatting, and
@@ -32,7 +31,7 @@ static-analysis checks. Run `bazel run //:format` to apply C++ formatting. Use
 `.bazelrc`; install Bazelisk and Clang/LLVM 19, including clang-format,
 clang-tidy, llvm-cov, and llvm-profdata, first.
 
-Read [Phase 1](docs/phase-1.md) for the transitional API and toolchain history. Clang-tidy
+Read [Phase 1](docs/phase-1.md) for historical API and toolchain notes. Clang-tidy
 below 16 is explicitly skipped for std::expected frontend incompatibility;
 do not describe that as a pass. Follow the roadmap one component at a time.
 
@@ -42,7 +41,6 @@ do not describe that as a pass. Follow the roadmap one component at a time.
   code contract, prove the component alone and in a parent, then build above it.
 - Restrict behavior atoms to NOT, AND, OR, constant bit, and initialized DFF.
   Larger components execute children and wires, never composite callbacks.
-  The retained atomic wide register is temporary baseline code only.
 - Separate containment from contract families. Use concepts/traits and explicit
   adapters; claimed specialization must preserve meaning, timing, and valid-use
   rules, with shared contract tests. Do not force an inheritance hierarchy.

@@ -13,17 +13,18 @@ questions, not permission to implement a whole library at once.
 
 ## Current starting point and next task
 
-The original Phase 1 register-only baseline is retained and tested. Its atomic
-wide registers and path-based enables are temporary mechanisms, not the new
-allowed floor. The uncompleted old Phase 2 arithmetic prototype is shelved; its
-unrestricted primitive interface and primitive full adder are not adopted.
-See [status](status.md) and [decisions](decisions.md).
+The original Phase 1 register-only engine has been retired. Its transfer,
+hold, swap, and chain guarantees are re-proved through DFF-composed word
+registers, with no second register simulator or path-based enable adapter.
+The uncompleted old Phase 2 arithmetic prototype is shelved; its unrestricted
+primitive interface and primitive full adder are not adopted. See
+[status](status.md) and [decisions](decisions.md).
 
 **NOT is implemented and accepted:** see [its contract and evidence](not.md).
 The first typed harness provides pure pre-edge observation, derived inventory,
 connection/schedule inspection, two-gate composition, invalid topology rejection,
-enumeration independence, transient snapshots, and retained values. The existing
-register baseline remains tested. These are the completed NOT requirements,
+enumeration independence, transient snapshots, and retained values. These are
+the completed NOT requirements,
 not completion of group A.
 
 **NOT, AND, OR, constant bit, initialized DFF, gate-composed XOR, and one-bit
@@ -35,7 +36,7 @@ their truth tables and parent composition. The DFF proves initial state,
 transient observation, edge-0 equivalence, repeated sampling, feedback,
 independent simulations, and simultaneous commit. XOR proves its truth table,
 gate inventory, schedule, and parent composition. Mux proves every selector/data
-row and parent composition. Preserve these and the transitional register proofs.
+row and parent composition. Preserve these and the composed-register proofs.
 **Fixed-width wire bundles are implemented and accepted:** see
 [their contract and evidence](wire-bundles.md). Bundle views preserve scalar
 endpoint identity; simulation finalizes each expanded wire through the existing
@@ -46,7 +47,7 @@ selector combinations pass, including parent composition. **The two-to-four
 one-hot decoder is implemented and accepted:** see
 [its contract and evidence](decoder-2-to-4.md). All four addresses produce one
 high output at the matching index, and its NOT/AND inventory and parent-boundary
-composition are tested. **Group B is complete; next: word register and movement.**
+composition are tested. **Group B is complete; next: registers and movement.**
 Do not reintroduce the old unrestricted primitive API.
 
 ## A. The atomic digital floor
@@ -102,21 +103,22 @@ owned MuxWord and WordRegister children; a shared readable-word contract capture
 the shape consumers use. **A serial shift register is implemented and
 accepted:** see [its contract and evidence](shift-register.md). Its enable and
 serial input are typed boundaries, and its shift direction and serial insertion
-are tested over repeated edges, including width one and parent composition. The
-next task is to migrate the transfer baseline to these components:
-its wide atomic storage and enabled-path script adapter must then disappear
-from the supported production model. Preserve the old transfer/hold/swap
-behavior through tests at the replacement interface, not a permanent second engine.
+are tested over repeated edges, including width one and parent composition.
+**The transfer example and regression suite now use only composed registers.**
+The wide atomic register and enabled-path API have been removed from production.
+Transfer, hold, simultaneous swap, nested instances, fan-out, independent
+simulations, and one-register-per-edge chain movement are tested at the new
+interface. Group C is complete.
 
 Proof: bit independence, whole-word sampling, enable/hold, simultaneous swap,
 one-register-per-edge chain movement, fan-out, nested repeated instances, and
 owned evidence that later edges cannot overwrite. Verify DFF counts from the
 actual register structure. Demonstrate a boundary-to-bit trace expansion.
 
-Define the first register contract families around actual consumer needs:
-readable word, edge-loaded word, enabled word, and shift behavior as needed.
-Test shared guarantees and explicit adaptations (such as enable tied high);
-prove that incompatible timing/control shapes are not accepted accidentally.
+The `ReadableWord`, `EnabledWord`, and `ShiftableWord` concepts record shapes
+earned by the current components. Extend them only when a bus or controller
+consumer needs another guarantee. Test explicit adaptations (such as enable
+tied high) and keep incompatible timing/control shapes distinct.
 
 Artifact: transfer, swap, and shift traces with register and DFF views.
 Checkpoint: can register behavior be explained entirely through child circuits?

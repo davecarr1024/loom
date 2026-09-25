@@ -1,3 +1,4 @@
+#include "loom/components/constant_bit.h"
 #include "loom/components/enabled_word_register.h"
 #include "loom/simulation/logic.h"
 #include <algorithm>
@@ -9,6 +10,7 @@
 #include <vector>
 
 namespace {
+using loom::components::ConstantBit;
 using loom::components::EnabledWordRegister;
 using loom::simulation::ComponentInfo;
 using loom::simulation::Definition;
@@ -76,6 +78,26 @@ struct EnabledParent {
                                          sink[2].input(), sink[3].input()))};
   }
 };
+
+struct AlwaysLoadAdapter {
+  const std::string name{"always"};
+  ConstantBit enabled{"load", Bit{true}};
+  EnabledWordRegister<4> reg{"register", bits(0b1001)};
+
+  auto children() const { return std::tie(enabled, reg); }
+  auto connections() const {
+    return std::tuple{
+        loom::structure::connect(enabled.output(), reg.enable_input())};
+  }
+};
+
+std::array<Binding, 4> bind_data(const EnabledWordRegister<4> &reg,
+                                 unsigned value) {
+  return {reg.data_ports()[0].bind(Bit{(value & 1U) != 0}),
+          reg.data_ports()[1].bind(Bit{(value & 2U) != 0}),
+          reg.data_ports()[2].bind(Bit{(value & 4U) != 0}),
+          reg.data_ports()[3].bind(Bit{(value & 8U) != 0})};
+}
 
 TEST(EnabledWordRegister, SelectsOldQToHoldAndInputToLoad) {
   const auto definition =
@@ -161,5 +183,28 @@ TEST(EnabledWordRegister, ParentControlsAndObservesComposedStorage) {
     ASSERT_NE(signal, observed->signals.end()) << path;
     EXPECT_EQ(signal->value.high(), index == 1 || index == 2);
   }
+}
+
+TEST(EnabledWordRegister, ConstantHighEnableAdaptsItToAlwaysLoad) {
+  const auto definition = Definition<AlwaysLoadAdapter>::create();
+  ASSERT_TRUE(definition) << definition.error().operation << ": "
+                          << definition.error().path;
+  const auto &adapter = (*definition)->root();
+  const auto simulation =
+      loom::simulation::Simulation<AlwaysLoadAdapter>::create(*definition);
+  ASSERT_TRUE(simulation);
+
+  const auto first = (*simulation)->step(bind_data(adapter.reg, 0b0101));
+  ASSERT_TRUE(first);
+  EXPECT_EQ(first->commits.size(), 4U);
+  const auto after_first = (*simulation)->observe(bind_data(adapter.reg, 0));
+  ASSERT_TRUE(after_first);
+  EXPECT_EQ(observed_word(*after_first, "always.register"), 0b0101U);
+
+  const auto second = (*simulation)->step(bind_data(adapter.reg, 0b1010));
+  ASSERT_TRUE(second);
+  const auto after_second = (*simulation)->observe(bind_data(adapter.reg, 0));
+  ASSERT_TRUE(after_second);
+  EXPECT_EQ(observed_word(*after_second, "always.register"), 0b1010U);
 }
 } // namespace

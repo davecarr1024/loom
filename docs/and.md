@@ -19,7 +19,7 @@ Run `bazel run //:and_demo` for the complete truth table through the same
 definition and observation path.
 
 The dependency engine represents zero, one, or multiple input endpoints
-per node. Existing NOT, boundary, malformed-wiring, cycle, and Phase 1 register
+per node. Existing NOT, boundary, malformed-wiring, cycle, and composed-register
 tests continue to pass. [OR](or.md) extends the same multi-input model; a
 constant bit and DFF now complete the initial atom floor. Gate-composed
 [XOR](xor.md) and [one-bit mux](mux-bit.md) extend those atoms. Fixed-width

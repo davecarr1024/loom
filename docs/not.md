@@ -3,8 +3,8 @@
 NOT and its typed observation harness implement the first component in
 [roadmap group A](roadmap.md). AND, OR, constant bit, and DFF now extend the
 atom floor. This is not completion of the later construction groups.
-The register-only
-[Phase 1](phase-1.md) API remains a separate transitional baseline.
+The register-only [Phase 1](phase-1.md) API has been retired; its transfer and
+state proofs now use the composed register components.
 
 ## Contract and public interface
 

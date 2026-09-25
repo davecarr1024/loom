@@ -17,8 +17,9 @@ machines. IRATA2 contributes hardware-ish structure and visible control;
 Rule Lab contributes concrete typed composition and derived structural facts.
 This is a new experiment, without IRATA instruction or API compatibility.
 
-This document specifies the target architecture. [Status](status.md) and
-[Phase 1](phase-1.md) describe the transitional register-only implementation;
+This document specifies the target architecture. [Status](status.md) tracks
+current acceptance; [Phase 1](phase-1.md) records the retired register-only
+implementation and its migration;
 [NOT](not.md), [AND](and.md), [OR](or.md), [constant bit](constant-bit.md), and
 [DFF](d-flip-flop.md) document the initial atom floor; [XOR](xor.md) documents
 the first gate-composed component; [one-bit mux](mux-bit.md) and

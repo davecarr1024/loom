@@ -27,9 +27,10 @@ components and connections; stateful circuits use independent simulation state
 with pure observations and atomic shared edges. See [DFF](docs/d-flip-flop.md)
 for the state boundary and [the roadmap](docs/roadmap.md) for next components.
 
-The tested register-only Phase 1 baseline remains transitional, with atomic wide
-registers to be replaced by composed flip-flops. See [roadmap](docs/roadmap.md)
-for construction order and [status](docs/status.md) for evidence and limitations.
+The former register-only Phase 1 engine has been retired. Transfer, hold, swap,
+and pipeline behavior now runs through DFF-composed word registers. See
+[roadmap](docs/roadmap.md) for construction order and [status](docs/status.md)
+for current evidence and limitations.
 See [AND](docs/and.md) and [OR](docs/or.md) for their two-input contracts and
 evidence.
 

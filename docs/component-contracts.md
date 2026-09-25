@@ -1,8 +1,8 @@
 # Component contracts and hardening
 
 This is the acceptance discipline for the [construction roadmap](roadmap.md).
-It specifies future deliverables; it does not claim the transitional baseline
-already provides typed controls, gates, or hierarchical trace expansion.
+It specifies acceptance requirements still ahead, including typed control
+families and instruction-level trace expansion.
 
 ## Contract before implementation
 
