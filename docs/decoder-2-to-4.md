@@ -12,5 +12,5 @@ the identity of the existing scalar ports.
 The tests check each address, both intermediate inverted bits, all four gate
 outputs, the derived inventory and schedule, and routing into a parent's output
 boundaries. Run `bazel run //:decoder2_to4_demo` for the complete one-hot table.
-This completes selection and bit-bundle group B; see the [roadmap](roadmap.md)
-for the word-register milestone next.
+This completes selection and bit-bundle group B. See the [roadmap](roadmap.md)
+for the accepted register/movement group and current bus milestone.

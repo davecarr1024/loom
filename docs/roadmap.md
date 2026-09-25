@@ -125,8 +125,11 @@ Checkpoint: can register behavior be explained entirely through child circuits?
 
 ## D. Selected buses and bus-connected registers
 
-Construct a small explicitly selected bus from word muxes and a register bank
-that can send and receive through it. Use a bounded source-selection interface;
+**A two-source selected bus is implemented and accepted:** see
+[its contract and evidence](selected-bus.md). Both selector values are valid;
+it owns a word mux and has no idle, tri-state, or invalid-consumption state.
+Construct a register bank that can send and receive through the bus. Use a
+bounded source-selection interface;
 if idle is useful, represent it explicitly with validity and define invalid
 consumption. Do not model tri-state resolution or retained values on an undriven bus.
 

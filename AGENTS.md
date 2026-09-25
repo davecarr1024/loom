@@ -12,9 +12,10 @@ The old register-only Phase 1 implementation has been retired. The revised
 construction plan has accepted NOT, AND, OR, constant bit, initialized DFF,
 gate-composed XOR, one-bit mux, fixed-width wire bundles, a word mux,
 two-to-four decoder, a DFF-composed word register, an enabled word register,
-and a shift register. Register/movement group C is complete. The selected bus
-and register bank are next. Read the relevant contract under `docs/` before
-extending a component. Do not resume the shelved arithmetic prototype.
+and a shift register. Register/movement group C is complete. The first group-D
+component, a two-source selected bus, is accepted; its bus-connected register
+bank is next. Read the relevant contract under `docs/` before extending a
+component. Do not resume the shelved arithmetic prototype.
 `./scripts/check.sh` is the presubmit command. It runs `bazel test //...`,
 then Bazel LCOV coverage and the 100% production line/function gate.
 `bazel test //...` runs behavioral, docs, compile-fail, formatting, and
@@ -26,7 +27,7 @@ static-analysis checks. Run `bazel run //:format` to apply C++ formatting. Use
 `bazel run //:decoder2_to4_demo`, `bazel run //:word_register_demo`,
 `bazel run //:enabled_word_register_demo`,
 `bazel run //:shift_register_demo`,
-`bazel run //:wire_bundle_demo`, and
+`bazel run //:wire_bundle_demo`, `bazel run //:selected_bus_demo`, and
 `bazel run //:transfer` to run the examples. The workspace pins Clang 19 through
 `.bazelrc`; install Bazelisk and Clang/LLVM 19, including clang-format,
 clang-tidy, llvm-cov, and llvm-profdata, first.

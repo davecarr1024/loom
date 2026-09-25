@@ -19,5 +19,6 @@ four-bit inputs and selector. A nested-boundary test verifies parent-driven
 inputs cannot also be bound, and a parent test inverts selected bits through
 ordinary NOT children. Run `bazel run //:mux_word_demo` for a four-bit trace.
 
-This accepts fixed-width selection. The next group-B component is a small
-one-hot decoder; see the [roadmap](roadmap.md).
+This is the fixed-width selection building block used by the
+[two-source selected bus](selected-bus.md). See the [roadmap](roadmap.md) for
+the component sequence and current register-bank work.

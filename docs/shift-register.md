@@ -19,6 +19,6 @@ two consecutive shifts, serial insertion, disabled hold, width one, the DFF
 inventory, parent boundary output, and word order. Run
 `bazel run //:shift_register_demo` for a repeated-shift trace.
 
-This completes the composed register building blocks. The next step migrates
-the transfer demonstration and its hold/swap tests away from the transitional
-wide-register engine; see the [roadmap](roadmap.md).
+This completes the composed register building blocks. Transfer and movement
+regressions now use these components, and the [roadmap](roadmap.md) advances to
+selected buses and bus-connected registers.

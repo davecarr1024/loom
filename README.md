@@ -22,6 +22,8 @@ the [word mux](docs/mux-word.md), a [two-to-four decoder](docs/decoder-2-to-4.md
 a [DFF-composed word register](docs/word-register.md), and an
 [enabled word register](docs/enabled-word-register.md) are implemented. A
 [shift register](docs/shift-register.md) composes these for serial movement.
+The [two-source selected bus](docs/selected-bus.md) routes a chosen word through
+the established mux network; a bus-connected register bank is next.
 Circuits execute from owned
 components and connections; stateful circuits use independent simulation state
 with pure observations and atomic shared edges. See [DFF](docs/d-flip-flop.md)
@@ -74,6 +76,7 @@ bazel run //:word_register_demo
 bazel run //:enabled_word_register_demo
 bazel run //:shift_register_demo
 bazel run //:wire_bundle_demo
+bazel run //:selected_bus_demo
 ```
 
 Run `bazel run //:format` to format C++ sources.
@@ -92,6 +95,7 @@ compile-fail, formatting, compatible static-analysis, and production coverage ga
 - [Word register](docs/word-register.md): fixed-width edge-loaded storage composed from initialized DFFs.
 - [Enabled word register](docs/enabled-word-register.md): synchronous load and hold through mux/DFF composition.
 - [Shift register](docs/shift-register.md): enabled serial movement through word-register and mux composition.
+- [Selected bus](docs/selected-bus.md): two-source word selection composed from the accepted word mux.
 - [Roadmap](docs/roadmap.md): component dependencies, proofs, and checkpoints.
 - [Decisions](docs/decisions.md): revised direction and withdrawn assumptions.
 - [Baseline](docs/baseline.md): inherited IRATA2 and Rule Lab lessons.

@@ -10,7 +10,9 @@ bundles](wire-bundles.md), [word mux](mux-word.md), a [two-to-four
 decoder](decoder-2-to-4.md), and a [word register](word-register.md) are
 implemented. An [enabled word register](enabled-word-register.md) is also
 implemented, as is a [serial shift register](shift-register.md). Register and
-movement group C is complete; selected buses and register banks are next.
+movement group C is complete. The first group-D component, a [two-source
+selected bus](selected-bus.md), is implemented and tested; a bus-connected
+register bank is next.
 
 ## What runs today
 
@@ -56,6 +58,10 @@ indices and injects the serial bit at index 0. Tests cover repeated shifts,
 hold, width one, and parent boundary wiring.
 `bazel run //:wire_bundle_demo` routes four bits through an ordered bundle and
 prints the resulting bit sequence.
+`bazel run //:selected_bus_demo` shows the selected source word at the actual
+per-bit mux outputs. `tests/selected_bus_test.cpp` exhausts both selector
+values and all four-bit source pairs, then verifies propagation into a parent
+boundary.
 
 The archived [Phase 1](phase-1.md) document records the removed wide-register
 API and toolchain history. `tests/circuit_test.cpp` now exhausts all four-bit
@@ -97,9 +103,9 @@ available; instruction-level trace expansion remains future work.
 
 ## Next component and checkpoint
 
-Build a bounded selected bus from word muxes, then a register bank that can
-send and receive through it. Define valid idle/selection semantics without
-tri-state resolution and preserve all gate, selection, and register proofs.
+Build the register bank that can send and receive through the accepted
+two-source selected bus. Keep selection validity explicit and preserve all
+gate, selection, and register proofs.
 
 The useful lesson from the baseline is that stable ownership and simultaneous
 state transitions make small assemblies executable without a CPU. The new
