@@ -26,6 +26,7 @@ The [two-source selected bus](docs/selected-bus.md) routes a chosen word through
 the established mux network. The [two-register bank](docs/register-bank-2.md)
 uses selected buses to route external and register data to storage.
 The [half adder](docs/half-adder.md) composes accepted XOR and AND children.
+The [full adder](docs/full-adder.md) composes two half adders and a carry merge.
 Circuits execute from owned
 components and connections; stateful circuits use independent simulation state
 with pure observations and atomic shared edges. See [DFF](docs/d-flip-flop.md)
@@ -81,6 +82,7 @@ bazel run //:wire_bundle_demo
 bazel run //:selected_bus_demo
 bazel run //:register_bank_2_demo
 bazel run //:half_adder_demo
+bazel run //:full_adder_demo
 ```
 
 Run `bazel run //:format` to format C++ sources.
@@ -102,6 +104,7 @@ compile-fail, formatting, compatible static-analysis, and production coverage ga
 - [Selected bus](docs/selected-bus.md): two-source word selection composed from the accepted word mux.
 - [Two-register bank](docs/register-bank-2.md): selected read/write buses around DFF-composed registers.
 - [Half adder](docs/half-adder.md): one-bit sum and carry from XOR and AND.
+- [Full adder](docs/full-adder.md): carry-in addition composed from half adders.
 - [Roadmap](docs/roadmap.md): component dependencies, proofs, and checkpoints.
 - [Decisions](docs/decisions.md): revised direction and withdrawn assumptions.
 - [Baseline](docs/baseline.md): inherited IRATA2 and Rule Lab lessons.

@@ -151,7 +151,9 @@ Checkpoint: do controls describe meaningful resource choices in code?
 
 **A half adder is implemented and accepted:** see
 [its contract and evidence](half-adder.md). Its sum and carry are the tested
-XOR and AND children. Construct a full adder, small ripple adder, incrementer, equality
+XOR and AND children. **A full adder is implemented and accepted:** see
+[its contract and evidence](full-adder.md). It composes two half adders and an
+OR carry merge. Construct a small ripple adder, incrementer, equality
 comparison, and a small ALU using Boolean and selection components. Choose the
 ALU's minimal operation set for the forthcoming accumulator datapath; do not
 add speculative operations. Build a counter from incrementer and register.

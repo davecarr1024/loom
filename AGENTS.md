@@ -13,9 +13,9 @@ construction plan has accepted NOT, AND, OR, constant bit, initialized DFF,
 gate-composed XOR, one-bit mux, fixed-width wire bundles, a word mux,
 two-to-four decoder, a DFF-composed word register, an enabled word register,
 and a shift register. Register/movement group C is complete. Group D's
-two-source selected bus and two-register bank are accepted. The half adder is
-the first accepted group-E component; the full adder is next. Read the relevant
-contract under `docs/` before extending a component.
+two-source selected bus and two-register bank are accepted. The half adder and
+full adder are accepted group-E components; the small ripple adder is next.
+Read the relevant contract under `docs/` before extending a component.
 Do not resume the shelved arithmetic prototype.
 `./scripts/check.sh` is the presubmit command. It runs `bazel test //...`,
 then Bazel LCOV coverage and the 100% production line/function gate.
@@ -29,7 +29,8 @@ static-analysis checks. Run `bazel run //:format` to apply C++ formatting. Use
 `bazel run //:enabled_word_register_demo`,
 `bazel run //:shift_register_demo`,
 `bazel run //:wire_bundle_demo`, `bazel run //:selected_bus_demo`,
-`bazel run //:register_bank_2_demo`, `bazel run //:half_adder_demo`, and
+`bazel run //:register_bank_2_demo`, `bazel run //:half_adder_demo`,
+`bazel run //:full_adder_demo`, and
 `bazel run //:transfer` to run the examples. The workspace pins Clang 19 through
 `.bazelrc`; install Bazelisk and Clang/LLVM 19, including clang-format,
 clang-tidy, llvm-cov, and llvm-profdata, first.
